@@ -54,7 +54,8 @@
     position: sticky; top: 0; z-index: 50;
     background: rgba(244,247,242,.92); backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--line);
-    padding: 14px 24px;
+    /* 顶部 + safe-area（PWA 下吞掉刘海/灵动岛高度，内容下压） */
+    padding: calc(14px + env(safe-area-inset-top)) calc(24px + env(safe-area-inset-right)) 14px calc(24px + env(safe-area-inset-left));
     display: flex; align-items: center; justify-content: space-between;
     gap: 16px; flex-wrap: wrap;
   }
@@ -325,7 +326,7 @@
   /* ━━━━━━━━━━ Footer ━━━━━━━━━━ */
   footer {
     text-align: center; color: var(--ink-soft); font-size: 11px;
-    padding: 30px 24px; letter-spacing: .5px;
+    padding: 30px 24px calc(30px + env(safe-area-inset-bottom)) 24px; letter-spacing: .5px;
   }
   footer a { color: inherit; }
 
@@ -358,7 +359,7 @@
 
   /* ━━━━━━━━━━ Tab 顶栏 ━━━━━━━━━━ */
   .tabbar {
-    position: sticky; top: 65px; z-index: 49;
+    position: sticky; top: calc(65px + env(safe-area-inset-top)); z-index: 49;
     background: var(--bg);
     border-bottom: 1px solid var(--line);
     padding: 0 24px;

@@ -57,7 +57,7 @@
   .container {
     max-width: 1100px;
     margin: 0 auto;
-    padding: 64px 32px 96px;
+    padding: calc(64px + env(safe-area-inset-top)) calc(32px + env(safe-area-inset-right)) calc(96px + env(safe-area-inset-bottom)) calc(32px + env(safe-area-inset-left));
   }
 
   /* ━━━━━━━━━━ Hero 区 ━━━━━━━━━━ */
@@ -928,7 +928,7 @@
 
   /* 返回命理今日链接 */
   .back-to-today {
-    position: fixed; top: 16px; left: 16px; z-index: 100;
+    position: fixed; top: calc(16px + env(safe-area-inset-top)); left: calc(16px + env(safe-area-inset-left)); z-index: 100;
     padding: 8px 14px; background: rgba(255, 255, 255, 0.92);
     border: 1px solid #d1d9e0; border-radius: 999px;
     font-size: 13px; color: #2D3A2E; text-decoration: none;
