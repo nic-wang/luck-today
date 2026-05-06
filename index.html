@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>命理今日 · 牛牛 & 嘻嘻</title>
+<style>
+  :root {
+    --bg: #F4F7F2;
+    --bg-card: #ffffff;
+    --bg-soft: #FAFCF8;
+    --ink: #2D3A2E;
+    --ink-soft: #7A8378;
+    --ink-mute: #A6AEA3;
+    --line: #E0E8DD;
+    --niu: #5C8A6B;
+    --niu-bg: #E2EDE5;
+    --xixi: #C9A26B;
+    --xixi-bg: #F5EBD8;
+    --good: #1a7f37;
+    --good-bg: #dafbe1;
+    --bad: #cf222e;
+    --bad-bg: #ffebe9;
+    --neutral: #8b8580;
+    --gold: #c9a26b;
+    --shadow: 0 6px 24px rgba(60, 78, 60, 0.08);
+    --shadow-mid: 0 12px 40px rgba(60, 78, 60, 0.12);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ━━━━━━━━━━ Header ━━━━━━━━━━ */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(244,247,242,.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-logo {
+    width: 36px; height: 36px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--niu), var(--xixi));
+    display: grid; place-items: center; font-size: 20px;
+  }
+  .brand h1 { font-size: 17px; margin: 0; letter-spacing: .5px; font-weight: 700; }
+  .brand p { font-size: 11px; margin: 2px 0 0; color: var(--ink-soft); letter-spacing: .3px; }
+
+  .live-stamp {
+    flex: 1; max-width: 520px;
+    display: grid; grid-template-columns: auto 1px auto 1px auto;
+    align-items: center; gap: 16px; padding: 8px 16px;
+    background: var(--bg-card); border-radius: 10px; border: 1px solid var(--line);
+    font-variant-numeric: tabular-nums; font-size: 13px;
+  }
+  .live-stamp .sep { width: 1px; height: 18px; background: var(--line); }
+  .live-stamp .label { font-size: 10px; color: var(--ink-soft); letter-spacing: .5px; text-transform: uppercase; display: block; margin-bottom: 2px; }
+  .live-stamp .value { font-weight: 600; }
+  .live-stamp #liveTime { font-feature-settings: 'tnum'; }
+
+  .view-switch { display: flex; gap: 4px; padding: 4px; background: var(--bg-card); border: 1px solid var(--line); border-radius: 10px; }
+  .view-switch button {
+    border: 0; background: transparent; padding: 6px 12px; border-radius: 7px;
+    font-size: 12px; cursor: pointer; color: var(--ink-soft); font-weight: 500;
+    transition: all .2s;
+  }
+  .view-switch button.active { background: var(--ink); color: #fff; }
+
+  /* ━━━━━━━━━━ 主体双栏 ━━━━━━━━━━ */
+  main {
+    max-width: 1480px; margin: 0 auto; padding: 24px;
+  }
+  .duo-wrap {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  }
+  .duo-wrap[data-mode="niu"] .col-xixi { display: none; }
+  .duo-wrap[data-mode="niu"] { grid-template-columns: 1fr; max-width: 720px; margin: 0 auto; }
+  .duo-wrap[data-mode="xixi"] .col-niu { display: none; }
+  .duo-wrap[data-mode="xixi"] { grid-template-columns: 1fr; max-width: 720px; margin: 0 auto; }
+
+  @media (max-width: 980px) {
+    .duo-wrap { grid-template-columns: 1fr; }
+    main { padding: 16px; }
+    .topbar { padding: 12px 16px; }
+    .live-stamp { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-size: 12px; }
+    .live-stamp .sep { display: none; }
+  }
+
+  /* 手机端深度优化 */
+  @media (max-width: 600px) {
+    body { font-size: 13px; }
+    main { padding: 12px; }
+    .topbar { padding: 10px 12px; gap: 10px; }
+    .topbar .brand h1 { font-size: 15px; }
+    .topbar .brand p { display: none; }
+    .live-stamp {
+      width: 100%; order: 3;
+      padding: 6px 10px; gap: 6px;
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+    .live-stamp .label { font-size: 9px; }
+    .live-stamp .value { font-size: 11px; }
+    .view-switch button { padding: 5px 9px; font-size: 11px; }
+    .tabbar { padding: 0 8px; }
+    .tabbar button { padding: 12px 12px; font-size: 12px; }
+    .card { padding: 16px; border-radius: 12px; }
+    .card h3 { font-size: 11px; }
+    .hero { padding: 16px; }
+    .hero-avatar { width: 56px !important; height: 56px !important; }
+    .hero-meta h2 { font-size: 18px !important; }
+    .now-action { padding: 12px !important; }
+    .now-action .now-title { font-size: 14px; }
+    .theme-title { font-size: 17px; }
+    .reco-grid { grid-template-columns: 1fr; }
+    .grouped-2 { grid-template-columns: 1fr; }
+    .hour-grid { grid-template-columns: 1fr; }
+    .tarot-area { grid-template-columns: 90px 1fr; gap: 10px; }
+    .tarot-card { width: 90px; height: 140px; padding: 10px; }
+    .tarot-card .t-emoji { font-size: 30px; }
+    .tarot-card .t-name { font-size: 12px; }
+    .full-row { padding: 16px; }
+    #dayunBox { grid-template-columns: 1fr !important; }
+    .couple-spotlight { padding: 18px; }
+    .cs-header { grid-template-columns: 44px 1fr 44px; gap: 10px; }
+    .cs-avatar { width: 44px; height: 44px; }
+    .cs-link .cs-keyword { font-size: 14px; }
+    .cs-link .cs-score { font-size: 11px; }
+    .embed-wrap iframe { height: calc(100vh - 130px); min-height: 520px; }
+    footer { padding: 20px 12px; }
+  }
+
+  /* ━━━━━━━━━━ 通用卡片 ━━━━━━━━━━ */
+  .col { display: flex; flex-direction: column; gap: 18px; }
+  .card {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 20px; box-shadow: var(--shadow);
+  }
+  .card h3 {
+    font-size: 12px; color: var(--ink-soft); letter-spacing: 1.2px;
+    text-transform: uppercase; margin: 0 0 12px; font-weight: 700;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card h3 .accent-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .col-niu .card h3 .accent-dot { background: var(--niu); }
+  .col-xixi .card h3 .accent-dot { background: var(--xixi); }
+  .card h3 .meta { margin-left: auto; font-size: 11px; color: var(--ink-soft); letter-spacing: .3px; text-transform: none; }
+
+  /* ━━━━━━━━━━ Hero 卡片 ━━━━━━━━━━ */
+  .hero {
+    background: linear-gradient(135deg, var(--bg-card), #faf8f3);
+    padding: 24px;
+  }
+  .hero-row { display: flex; align-items: center; gap: 16px; }
+  .hero-avatar {
+    width: 72px; height: 72px; border-radius: 50%;
+    border: 3px solid;
+    background-size: cover; background-position: center; flex-shrink: 0;
+  }
+  .col-niu .hero-avatar { border-color: var(--niu); background-image: url('assets/photos/牛牛-像素图.jpg'); }
+  .col-xixi .hero-avatar { border-color: var(--xixi); background-image: url('assets/photos/嘻嘻-像素图.jpg'); }
+  .hero-meta h2 { margin: 0; font-size: 22px; letter-spacing: .5px; }
+  .hero-meta .alias { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+  .hero-meta .bazi { font-size: 12px; color: var(--ink-soft); margin-top: 4px; font-feature-settings: 'tnum'; }
+  .hero .now-action {
+    margin-top: 16px; padding: 14px; border-radius: 10px;
+    background: var(--good-bg); border: 1px solid #b4e3c2;
+  }
+  .hero .now-action.bad { background: var(--bad-bg); border-color: #ffcecb; }
+  .hero .now-action.neutral { background: #f1efe8; border-color: var(--line); }
+  .now-action .now-tag {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--good); margin-bottom: 6px;
+  }
+  .now-action.bad .now-tag { color: var(--bad); }
+  .now-action.neutral .now-tag { color: var(--ink-soft); }
+  .now-action .now-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .now-action .now-desc { font-size: 13px; color: var(--ink); }
+  .now-action .now-meta {
+    margin-top: 8px; font-size: 11px; color: var(--ink-soft);
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .countdown {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 8px; background: rgba(0,0,0,.04); border-radius: 6px;
+    font-feature-settings: 'tnum'; font-size: 11px;
+  }
+
+  /* ━━━━━━━━━━ 今日主题 ━━━━━━━━━━ */
+  .theme-title { font-size: 20px; font-weight: 700; margin: 0 0 4px; }
+  .theme-shen {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; margin-bottom: 8px;
+  }
+  .col-niu .theme-shen { background: var(--niu-bg); color: var(--niu); }
+  .col-xixi .theme-shen { background: var(--xixi-bg); color: var(--xixi); }
+  .theme-scene { font-size: 13px; color: var(--ink-soft); margin: 0 0 14px; line-height: 1.7; }
+  .action-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .action-list li { font-size: 13px; padding-left: 18px; position: relative; }
+  .action-list li::before { position: absolute; left: 0; top: 0; }
+  .good-list li::before { content: '✓'; color: var(--good); font-weight: 700; }
+  .bad-list li::before { content: '✗'; color: var(--bad); font-weight: 700; }
+  .grouped-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grouped-2 .grp-title { font-size: 11px; color: var(--ink-soft); letter-spacing: .8px; text-transform: uppercase; margin-bottom: 6px; }
+  @media (max-width: 460px) { .grouped-2 { grid-template-columns: 1fr; } }
+
+  /* ━━━━━━━━━━ 时段指南 ━━━━━━━━━━ */
+  .hour-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  @media (max-width: 540px) { .hour-grid { grid-template-columns: 1fr; } }
+  .hour-cell {
+    padding: 10px 12px; border-radius: 8px; font-size: 12px;
+    background: var(--bg); border: 1px solid var(--line); display: flex; gap: 8px; align-items: center;
+  }
+  .hour-cell.good { background: var(--good-bg); border-color: #b4e3c2; }
+  .hour-cell.bad { background: var(--bad-bg); border-color: #ffcecb; }
+  .hour-cell.now { box-shadow: 0 0 0 2px var(--ink); }
+  .hour-cell .h-time { font-weight: 700; font-feature-settings: 'tnum'; min-width: 56px; }
+  .hour-cell .h-gate { font-size: 11px; color: var(--ink-soft); }
+  .hour-cell .h-tag { margin-left: auto; font-size: 11px; }
+
+  /* ━━━━━━━━━━ 四维进度 ━━━━━━━━━━ */
+  .dim-list { display: grid; gap: 10px; }
+  .dim-row { display: grid; grid-template-columns: 56px 1fr 36px; gap: 10px; align-items: center; font-size: 12px; }
+  .dim-bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+  .dim-bar > span {
+    display: block; height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--gold), #d8b97f);
+    transition: width .8s;
+  }
+  .col-niu .dim-bar > span { background: linear-gradient(90deg, var(--niu), #88a98f); }
+  .dim-row .dim-num { text-align: right; font-feature-settings: 'tnum'; font-weight: 700; }
+
+  /* ━━━━━━━━━━ 推荐网格 ━━━━━━━━━━ */
+  .reco-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .reco-cell {
+    padding: 10px 12px; border-radius: 9px;
+    background: var(--bg); border: 1px solid var(--line);
+  }
+  .reco-cell .rc-label { font-size: 10px; color: var(--ink-soft); letter-spacing: .8px; text-transform: uppercase; margin-bottom: 4px; }
+  .reco-cell .rc-value { font-size: 13px; font-weight: 600; }
+  .reco-cell .rc-extra { font-size: 11px; color: var(--ink-soft); margin-top: 3px; }
+  .reco-foods { grid-column: 1 / -1; }
+  .reco-foods .rc-value { font-weight: 400; font-size: 12px; line-height: 1.7; }
+  .copy-btn {
+    margin-top: 6px; border: 0; background: transparent; cursor: pointer;
+    color: var(--ink-soft); font-size: 11px; padding: 0; text-decoration: underline;
+  }
+  .copy-btn:hover { color: var(--ink); }
+
+  /* ━━━━━━━━━━ 塔罗 ━━━━━━━━━━ */
+  .tarot-area { display: grid; grid-template-columns: 110px 1fr; gap: 14px; align-items: center; }
+  .tarot-card {
+    width: 110px; height: 170px; border-radius: 12px;
+    background: linear-gradient(135deg, #2a2a35, #4a4458);
+    color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 14px;
+    box-shadow: 0 4px 20px rgba(45,42,38,.15);
+    position: relative; overflow: hidden;
+  }
+  .tarot-card::before {
+    content: ''; position: absolute; inset: 6px;
+    border: 1px solid rgba(255,255,255,.18); border-radius: 8px;
+    pointer-events: none;
+  }
+  .tarot-card .t-emoji { font-size: 38px; margin-bottom: 8px; }
+  .tarot-card .t-name { font-size: 13px; font-weight: 700; }
+  .tarot-card .t-pos { font-size: 10px; color: rgba(255,255,255,.7); margin-top: 4px; }
+  .tarot-card.reversed { background: linear-gradient(135deg, #6b3d3d, #8a4747); }
+  .tarot-card.reversed .t-emoji { transform: rotate(180deg); }
+  .tarot-meaning { font-size: 13px; }
+  .tarot-meaning .t-up { font-weight: 700; margin-bottom: 4px; }
+  .tarot-meaning .t-down { color: var(--ink-soft); font-size: 12px; }
+  .tarot-ask { display: flex; gap: 8px; margin-top: 12px; }
+  .tarot-ask input {
+    flex: 1; border: 1px solid var(--line); border-radius: 8px;
+    padding: 8px 10px; font-size: 13px; background: var(--bg);
+    font-family: inherit;
+  }
+  .tarot-ask button {
+    padding: 8px 14px; border: 0; background: var(--ink); color: #fff;
+    border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600;
+  }
+  .tarot-ask button:hover { opacity: .85; }
+
+  /* ━━━━━━━━━━ 签到挑战 ━━━━━━━━━━ */
+  .sign-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+  .sign-card {
+    padding: 14px; border-radius: 10px; background: var(--bg);
+    border: 1px solid var(--line); text-align: center;
+  }
+  .sign-card .num {
+    font-size: 26px; font-weight: 700; line-height: 1;
+    font-feature-settings: 'tnum'; margin-bottom: 4px;
+  }
+  .sign-card .lab { font-size: 11px; color: var(--ink-soft); letter-spacing: .5px; }
+  .challenge-card {
+    margin-top: 12px; padding: 12px; border-radius: 10px;
+    background: var(--good-bg); border: 1px solid #b4e3c2;
+  }
+  .challenge-card .ch-title { font-size: 12px; font-weight: 700; margin-bottom: 4px; color: var(--good); }
+  .challenge-card .ch-body { font-size: 13px; }
+
+  /* ━━━━━━━━━━ Footer ━━━━━━━━━━ */
+  footer {
+    text-align: center; color: var(--ink-soft); font-size: 11px;
+    padding: 30px 24px; letter-spacing: .5px;
+  }
+  footer a { color: inherit; }
+
+  /* 节气专题 + 大运 + 历史 全宽 */
+  .full-row {
+    margin-top: 24px;
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 20px; box-shadow: var(--shadow);
+  }
+  .full-row h3 {
+    font-size: 12px; color: var(--ink-soft); letter-spacing: 1.2px;
+    text-transform: uppercase; margin: 0 0 12px; font-weight: 700;
+  }
+
+  /* 历史曲线 */
+  .history-svg { width: 100%; height: 140px; }
+
+  /* 动画 */
+  @keyframes fadein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .card { animation: fadein .4s ease both; }
+
+  /* 复制提示 */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: #fff; padding: 8px 16px; border-radius: 8px;
+    font-size: 12px; opacity: 0; pointer-events: none; transition: opacity .25s;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ━━━━━━━━━━ Tab 顶栏 ━━━━━━━━━━ */
+  .tabbar {
+    position: sticky; top: 65px; z-index: 49;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    padding: 0 24px;
+    display: flex; gap: 4px; overflow-x: auto;
+  }
+  .tabbar button {
+    border: 0; background: transparent; padding: 14px 18px;
+    font-size: 13px; font-weight: 500; color: var(--ink-soft);
+    cursor: pointer; position: relative; white-space: nowrap;
+    font-family: inherit;
+  }
+  .tabbar button.active { color: var(--ink); font-weight: 700; }
+  .tabbar button.active::after {
+    content: ''; position: absolute; left: 12px; right: 12px; bottom: 0;
+    height: 2px; background: var(--niu);
+  }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  /* iframe 嵌入 */
+  .embed-wrap {
+    margin: 0; padding: 0;
+    border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+    background: var(--bg-card); box-shadow: var(--shadow);
+  }
+  .embed-wrap iframe {
+    width: 100%; height: calc(100vh - 200px); min-height: 700px;
+    border: 0; display: block;
+  }
+
+  /* ━━━━━━━━━━ 时辰白话注释 ━━━━━━━━━━ */
+  .hour-cell { flex-direction: column; align-items: stretch !important; gap: 2px !important; }
+  .hour-cell .h-line1 { display: flex; align-items: center; gap: 8px; }
+  .hour-cell .h-plain { font-size: 11px; color: var(--ink-mute); padding-left: 0; line-height: 1.4; }
+  .hour-cell.now .h-plain { color: var(--ink-soft); }
+
+  /* ━━━━━━━━━━ 双人关系亮点卡 ━━━━━━━━━━ */
+  .couple-spotlight {
+    margin-top: 24px;
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 16px; padding: 28px; box-shadow: var(--shadow);
+    background-image:
+      radial-gradient(at 0% 0%, rgba(92,138,107,.06) 0%, transparent 40%),
+      radial-gradient(at 100% 100%, rgba(201,162,107,.08) 0%, transparent 40%);
+  }
+  .couple-spotlight h3 {
+    font-size: 12px; color: var(--ink-soft); letter-spacing: 1.2px;
+    text-transform: uppercase; margin: 0 0 18px; font-weight: 700;
+  }
+  .cs-header {
+    display: grid; grid-template-columns: 60px 1fr 60px;
+    align-items: center; gap: 16px; margin-bottom: 18px;
+  }
+  .cs-avatar {
+    width: 60px; height: 60px; border-radius: 50%;
+    background-size: cover; background-position: center;
+    border: 3px solid;
+  }
+  .cs-avatar.left { border-color: var(--niu); background-image: url('assets/photos/牛牛-像素图.jpg'); }
+  .cs-avatar.right { border-color: var(--xixi); background-image: url('assets/photos/嘻嘻-像素图.jpg'); }
+  .cs-link {
+    text-align: center; padding: 8px;
+  }
+  .cs-link .cs-keyword { font-size: 16px; font-weight: 700; }
+  .cs-link .cs-score { font-size: 12px; color: var(--ink-soft); margin-top: 4px; letter-spacing: 1px; }
+  .cs-line {
+    height: 1px; background: linear-gradient(90deg, var(--niu), var(--xixi));
+    margin: 4px 0;
+  }
+  .cs-essence, .cs-today {
+    font-size: 13px; line-height: 1.7; margin: 0 0 10px;
+  }
+  .cs-today {
+    padding: 10px 12px; background: var(--niu-bg); border-radius: 8px;
+    border-left: 3px solid var(--niu); color: var(--ink);
+  }
+  .cs-actions {
+    margin: 14px 0 0; padding: 0; list-style: none;
+    display: grid; gap: 6px;
+  }
+  .cs-actions li {
+    font-size: 13px; padding-left: 22px; position: relative;
+  }
+  .cs-actions li::before {
+    content: '▸'; position: absolute; left: 4px; color: var(--niu);
+  }
+
+  @media (max-width: 720px) {
+    .embed-wrap iframe { height: calc(100vh - 160px); min-height: 600px; }
+    .cs-header { grid-template-columns: 48px 1fr 48px; }
+    .cs-avatar { width: 48px; height: 48px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-logo">🔮</div>
+    <div>
+      <h1>命理今日</h1>
+      <p>双视角 · 即时趋吉避凶</p>
+    </div>
+  </div>
+  <div class="live-stamp">
+    <div>
+      <span class="label">现在</span>
+      <span class="value" id="liveTime">--:--:--</span>
+    </div>
+    <span class="sep"></span>
+    <div>
+      <span class="label">今日干支</span>
+      <span class="value" id="liveGanzhi">— —</span>
+    </div>
+    <span class="sep"></span>
+    <div>
+      <span class="label">农历</span>
+      <span class="value" id="liveLunar">—</span>
+    </div>
+  </div>
+  <div class="view-switch" id="viewSwitch">
+    <button data-mode="duo" class="active">双人并排</button>
+    <button data-mode="niu">仅牛牛</button>
+    <button data-mode="xixi">仅嘻嘻</button>
+  </div>
+</div>
+
+<!-- Tab 顶栏 -->
+<nav class="tabbar" id="tabbar">
+  <button data-tab="today" class="active">📍 今日</button>
+  <button data-tab="family">🏠 家庭命格</button>
+  <button data-tab="relations">🔗 关系矩阵</button>
+  <button data-tab="dayun">🛤️ 大运</button>
+</nav>
+
+<main>
+  <!-- ━━━━━━━━━━ Tab: 今日（默认） ━━━━━━━━━━ -->
+  <div class="tab-pane active" id="tab-today">
+  <div class="duo-wrap" id="duoWrap" data-mode="duo">
+
+    <!-- ━━━━━━━━━━ 牛牛栏 ━━━━━━━━━━ -->
+    <section class="col col-niu" id="col-niu">
+      <div class="card hero">
+        <div class="hero-row">
+          <div class="hero-avatar"></div>
+          <div class="hero-meta">
+            <h2>牛牛 <span style="font-size:13px;font-weight:400;color:var(--ink-soft)">· 王宁</span></h2>
+            <div class="alias">乙木 · 用神水 · 🐍蛇</div>
+            <div class="bazi">己巳 · 己巳 · 乙亥 · 癸未</div>
+          </div>
+        </div>
+        <div class="now-action" id="niu-now">
+          <div class="now-tag" id="niu-now-tag">现在 · 加载中</div>
+          <div class="now-title" id="niu-now-title">—</div>
+          <div class="now-desc" id="niu-now-desc">—</div>
+          <div class="now-meta" id="niu-now-meta"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="accent-dot"></span>今日主题<span class="meta" id="niu-theme-meta">—</span></h3>
+        <div class="theme-title" id="niu-theme-title">—</div>
+        <span class="theme-shen" id="niu-theme-shen">—</span>
+        <p class="theme-scene" id="niu-theme-scene">—</p>
+        <div class="grouped-2">
+          <div>
+            <div class="grp-title">趋吉行动</div>
+            <ul class="action-list good-list" id="niu-good"></ul>
+          </div>
+          <div>
+            <div class="grp-title">避坑提醒</div>
+            <ul class="action-list bad-list" id="niu-bad"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="accent-dot"></span>趋吉清单 · 宜 / 忌</h3>
+        <div class="grouped-2">
+          <div>
+            <div class="grp-title" style="color:var(--good)">宜</div>
+            <ul class="action-list good-list" id="niu-yi"></ul>
+          </div>
+          <div>
+            <div class="grp-title" style="color:var(--bad)">忌</div>
+            <ul class="action-list bad-list" id="niu-ji"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="accent-dot"></span>时段行动指南<span class="meta">12 时辰 · ▶ 当前</span></h3>
+        <div class="hour-grid" id="niu-hours"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="accent-dot"></span>四维好运<span class="meta">综合 <span id="niu-score">—</span> / 100</span></h3>
+        <div class="dim-list" id="niu-dims"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="accent-dot"></span>趋吉行动建议</h3>
+        <div class="reco-grid" id="niu-reco"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="accent-dot"></span>今日塔罗 · 抽牌结果</h3>
+        <div class="tarot-area" id="niu-tarot"></div>
+        <div class="tarot-ask">
+          <input type="text" placeholder="想问点什么？比如今天适合签合同吗" data-user="niu">
+          <button data-user="niu">抽牌</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="accent-dot"></span>签到 · 挑战</h3>
+        <div class="sign-row">
+          <div class="sign-card">
+            <div class="num" id="niu-streak">—</div>
+            <div class="lab">连续签到（天）</div>
+          </div>
+          <div class="sign-card">
+            <div class="num" id="niu-total">—</div>
+            <div class="lab">累计签到（天）</div>
+          </div>
+        </div>
+        <div class="challenge-card">
+          <div class="ch-title">今日挑战</div>
+          <div class="ch-body" id="niu-challenge">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ━━━━━━━━━━ 嘻嘻栏 ━━━━━━━━━━ -->
+    <section class="col col-xixi" id="col-xixi">
+      <div class="card hero">
+        <div class="hero-row">
+          <div class="hero-avatar"></div>
+          <div class="hero-meta">
+            <h2>嘻嘻 <span style="font-size:13px;font-weight:400;color:var(--ink-soft)">· 郭玉玺</span></h2>
+            <div class="alias">丙火 · 用神水 · 🐰兔</div>
+            <div class="bazi">己卯 · 己巳 · 丙戌 · 己亥</div>
+          </div>
+        </div>
+        <div class="now-action" id="xixi-now">
+          <div class="now-tag" id="xixi-now-tag">现在 · 加载中</div>
+          <div class="now-title" id="xixi-now-title">—</div>
+          <div class="now-desc" id="xixi-now-desc">—</div>
+          <div class="now-meta" id="xixi-now-meta"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="accent-dot"></span>今日主题<span class="meta" id="xixi-theme-meta">—</span></h3>
+        <div class="theme-title" id="xixi-theme-title">—</div>
+        <span class="theme-shen" id="xixi-theme-shen">—</span>
+        <p class="theme-scene" id="xixi-theme-scene">—</p>
+        <div class="grouped-2">
+          <div>
+            <div class="grp-title">趋吉行动</div>
+            <ul class="action-list good-list" id="xixi-good"></ul>
+          </div>
+          <div>
+            <div class="grp-title">避坑提醒</div>
+            <ul class="action-list bad-list" id="xixi-bad"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="accent-dot"></span>趋吉清单 · 宜 / 忌</h3>
+        <div class="grouped-2">
+          <div>
+            <div class="grp-title" style="color:var(--good)">宜</div>
+            <ul class="action-list good-list" id="xixi-yi"></ul>
+          </div>
+          <div>
+            <div class="grp-title" style="color:var(--bad)">忌</div>
+            <ul class="action-list bad-list" id="xixi-ji"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="accent-dot"></span>时段行动指南<span class="meta">12 时辰 · ▶ 当前</span></h3>
+        <div class="hour-grid" id="xixi-hours"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="accent-dot"></span>四维好运<span class="meta">综合 <span id="xixi-score">—</span> / 100</span></h3>
+        <div class="dim-list" id="xixi-dims"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="accent-dot"></span>趋吉行动建议</h3>
+        <div class="reco-grid" id="xixi-reco"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="accent-dot"></span>今日塔罗 · 抽牌结果</h3>
+        <div class="tarot-area" id="xixi-tarot"></div>
+        <div class="tarot-ask">
+          <input type="text" placeholder="想问点什么？比如今天适合表白吗" data-user="xixi">
+          <button data-user="xixi">抽牌</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="accent-dot"></span>签到 · 挑战</h3>
+        <div class="sign-row">
+          <div class="sign-card">
+            <div class="num" id="xixi-streak">—</div>
+            <div class="lab">连续签到（天）</div>
+          </div>
+          <div class="sign-card">
+            <div class="num" id="xixi-total">—</div>
+            <div class="lab">累计签到（天）</div>
+          </div>
+        </div>
+        <div class="challenge-card">
+          <div class="ch-title">今日挑战</div>
+          <div class="ch-body" id="xixi-challenge">—</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ━━━━━━━━━━ 双人关系亮点（newt） ━━━━━━━━━━ -->
+  <section class="couple-spotlight" id="coupleSpotlight">
+    <h3>💞 你俩今日 · 关系亮点</h3>
+    <div class="cs-header">
+      <div class="cs-avatar left"></div>
+      <div class="cs-link">
+        <div class="cs-keyword" id="csKeyword">—</div>
+        <div class="cs-line"></div>
+        <div class="cs-score" id="csScore">—</div>
+      </div>
+      <div class="cs-avatar right"></div>
+    </div>
+    <p class="cs-essence" id="csEssence">—</p>
+    <p class="cs-today" id="csToday">—</p>
+    <ul class="cs-actions" id="csActions"></ul>
+  </section>
+
+  <!-- ━━━━━━━━━━ 节气专题（节气日才显示） ━━━━━━━━━━ -->
+  <div id="jieqiBox" class="full-row" style="display:none">
+    <h3>🌱 节气专题</h3>
+    <div id="jieqiContent"></div>
+  </div>
+
+  <!-- ━━━━━━━━━━ 历史能量曲线 ━━━━━━━━━━ -->
+  <div class="full-row">
+    <h3>📈 最近 30 天 · 能量曲线（每次访问签到自动记录）</h3>
+    <svg class="history-svg" id="historySvg" viewBox="0 0 720 140" preserveAspectRatio="none"></svg>
+    <div style="display:flex;gap:24px;font-size:11px;color:var(--ink-soft);margin-top:6px">
+      <span><span style="display:inline-block;width:10px;height:2px;background:var(--niu);margin-right:6px;vertical-align:middle"></span>牛牛</span>
+      <span><span style="display:inline-block;width:10px;height:2px;background:var(--xixi);margin-right:6px;vertical-align:middle"></span>嘻嘻</span>
+    </div>
+  </div>
+  </div><!-- /tab-today -->
+
+  <!-- ━━━━━━━━━━ Tab: 家庭命格 ━━━━━━━━━━ -->
+  <div class="tab-pane" id="tab-family">
+    <div class="embed-wrap">
+      <iframe data-src="family/index.html?embed=1" loading="lazy" title="家庭命格看板"></iframe>
+    </div>
+  </div>
+
+  <!-- ━━━━━━━━━━ Tab: 关系矩阵 ━━━━━━━━━━ -->
+  <div class="tab-pane" id="tab-relations">
+    <div class="embed-wrap">
+      <iframe data-src="family/index.html?embed=1#relation-matrix" loading="lazy" title="关系矩阵"></iframe>
+    </div>
+  </div>
+
+  <!-- ━━━━━━━━━━ Tab: 大运 ━━━━━━━━━━ -->
+  <div class="tab-pane" id="tab-dayun">
+    <div class="full-row">
+      <h3>🛤️ 大运 · 未来 3 步（基于八字命局）</h3>
+      <div id="dayunBox" style="display:grid;grid-template-columns:1fr 1fr;gap:24px"></div>
+      <p style="margin-top:18px;font-size:12px;color:var(--ink-soft);line-height:1.7">
+        ※ 大运是十年一变的人生周期 · 流年是当年小循环 · 这里只列未来 3 个高低节点。<br>
+        如需完整大运盘 / 流月详细分析，可去命理工具深查。
+      </p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  命理今日 v1 · 双视角实时趋吉避凶 · 数据全部本地计算 ·
+  <a href="family/index.html">→ 家庭命格看板</a>
+</footer>
+
+<div class="toast" id="toast">已复制到剪贴板</div>
+
+<script src="lib/gate.js"></script>
+<script src="vendor/lunar.js"></script>
+<script src="lib/relations.js"></script>
+<script src="lib/luck-engine.js"></script>
+<script>
+/* ━━━━━━━━━━ 用户档案（直接硬编码 · 已与 LuckCraft 一致）━━━━━━━━━━ */
+const USERS = {
+  niu: {
+    id: 'niu', year: 1989, month: 5, day: 15, hour: 14, gender: '男',
+    accent: { color: '#5C8A6B', bg: '#E2EDE5' },
+    challenges: [
+      { tag: '事业', text: '今天主动向一位同事请教一个具体问题，记录在备忘里' },
+      { tag: '财运', text: '今天记录所有支出，找出 1 笔可以省下的' },
+      { tag: '健康', text: '今天做 10 分钟拉伸，把肩颈放松一次' },
+      { tag: '社交', text: '给一位 30 天没联系的朋友发个问候' },
+      { tag: '学习', text: '看 1 篇高质量长文，提取 3 个要点' }
+    ]
+  },
+  xixi: {
+    id: 'xixi', year: 1999, month: 6, day: 3, hour: 22, gender: '女',
+    accent: { color: '#C9A26B', bg: '#F5EBD8' },
+    challenges: [
+      { tag: '形象', text: '今天搭一身让自己满意的造型，自拍存档' },
+      { tag: '社交', text: '今天给一位喜欢的家人/朋友寄一句感谢' },
+      { tag: '心情', text: '今天写 3 件让自己开心的小事' },
+      { tag: '学习', text: '今天背 5 个英语长句' },
+      { tag: '健康', text: '今天喝够 1.5 升水，睡前不刷手机 30 分钟' }
+    ]
+  }
+};
+
+/* ━━━━━━━━━━ Live Topbar ━━━━━━━━━━ */
+function pad(n) { return String(n).padStart(2, '0'); }
+function updateLive() {
+  const now = new Date();
+  document.getElementById('liveTime').textContent =
+    `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+}
+setInterval(updateLive, 1000);
+updateLive();
+
+function updateLiveGanzhi() {
+  const today = LuckEngine.compute(USERS.niu).today;
+  document.getElementById('liveGanzhi').textContent = `${today.dayGan}${today.dayZhi} · ${today.animal}`;
+  document.getElementById('liveLunar').textContent = today.lunarDate;
+}
+
+/* ━━━━━━━━━━ 渲染单个人 ━━━━━━━━━━ */
+function fmtRange([s, e]) { return `${pad(s)}–${pad(e === 0 ? 24 : e)}`; }
+
+function render(userKey) {
+  const user = USERS[userKey];
+  const data = LuckEngine.compute(user);
+  const prefix = userKey;
+
+  // Hero · 现在该做什么
+  const cg = data.currentGate;
+  const nowEl = document.getElementById(`${prefix}-now`);
+  nowEl.classList.remove('bad', 'neutral');
+  let cls = 'good';
+  if (cg.luck === '凶' || cg.luck === '大凶') cls = 'bad';
+  else if (cg.luck === '中') cls = 'neutral';
+  if (cls !== 'good') nowEl.classList.add(cls);
+  document.getElementById(`${prefix}-now-tag`).textContent = `现在 · ${cg.zhi}时 · ${cg.gate} · ${cg.luck}`;
+  document.getElementById(`${prefix}-now-title`).textContent = cg.advice;
+  document.getElementById(`${prefix}-now-desc`).textContent = `${data.theme.shiShen}日 · ${data.theme.theme}`;
+  // 倒计时
+  const next = data.nextGood;
+  const meta = document.getElementById(`${prefix}-now-meta`);
+  meta.innerHTML = '';
+  if (next.gate) {
+    const m = Math.floor(next.minutesLeft);
+    const h = Math.floor(m / 60);
+    const mm = m % 60;
+    meta.innerHTML = `
+      <span class="countdown">⏳ ${h>0?h+'h ':''}${mm}m 后 → ${next.gate.zhi}时 ${next.gate.gate}</span>
+      <span>📍 今日吉方：${data.recommendations.bestDir}</span>
+      <span>🎯 数字：${data.recommendations.numbers.join(' · ')}</span>
+    `;
+  }
+
+  // 今日主题
+  document.getElementById(`${prefix}-theme-title`).textContent = data.theme.theme;
+  document.getElementById(`${prefix}-theme-shen`).textContent = `${data.theme.shiShen}日`;
+  document.getElementById(`${prefix}-theme-scene`).textContent = data.theme.scene;
+  document.getElementById(`${prefix}-theme-meta`).textContent = `${data.today.dayGan}${data.today.dayZhi}日`;
+
+  document.getElementById(`${prefix}-good`).innerHTML = data.theme.goodFor.map(x => `<li>${x}</li>`).join('');
+  document.getElementById(`${prefix}-bad`).innerHTML = data.theme.watchOut.map(x => `<li>${x}</li>`).join('');
+
+  // 宜忌
+  document.getElementById(`${prefix}-yi`).innerHTML = data.yiJi.yi.map(x => `<li>${x}</li>`).join('');
+  document.getElementById(`${prefix}-ji`).innerHTML = data.yiJi.ji.map(x => `<li>${x}</li>`).join('');
+
+  // 时段
+  const hoursEl = document.getElementById(`${prefix}-hours`);
+  const nowZhi = cg.zhi;
+  hoursEl.innerHTML = data.gates.map(g => {
+    let cellCls = 'hour-cell';
+    if (g.luck === '吉' || g.luck === '大吉') cellCls += ' good';
+    else if (g.luck === '凶' || g.luck === '大凶') cellCls += ' bad';
+    if (g.zhi === nowZhi) cellCls += ' now';
+    return `
+      <div class="${cellCls}">
+        <div class="h-line1">
+          <span class="h-time">${g.zhi === nowZhi ? '▶ ' : ''}${fmtRange(g.hourRange)}</span>
+          <span class="h-gate">${g.gate}</span>
+          <span class="h-tag">${g.tag}</span>
+        </div>
+        <div class="h-plain">${g.plain || g.advice}</div>
+      </div>
+    `;
+  }).join('');
+
+  // 四维
+  const dimEl = document.getElementById(`${prefix}-dims`);
+  dimEl.innerHTML = Object.entries(data.dim).map(([k, v]) => `
+    <div class="dim-row">
+      <span>${k}</span>
+      <div class="dim-bar"><span style="width:${v}%"></span></div>
+      <span class="dim-num">${v}</span>
+    </div>
+  `).join('');
+  document.getElementById(`${prefix}-score`).textContent = data.score;
+
+  // 推荐
+  const r = data.recommendations;
+  const recoEl = document.getElementById(`${prefix}-reco`);
+  recoEl.innerHTML = `
+    <div class="reco-cell">
+      <div class="rc-label">穿搭</div>
+      <div class="rc-value">${r.colors.join(' / ')}</div>
+      <div class="rc-extra">${r.colorsAdvice}</div>
+      <button class="copy-btn" data-copy="${r.colors.join(' · ')} · ${r.colorItems.join('、')}">📋 复制配色</button>
+    </div>
+    <div class="reco-cell">
+      <div class="rc-label">饰品加持</div>
+      <div class="rc-value">${r.accessory}</div>
+      <div class="rc-extra">本命用神 · 五行加成</div>
+    </div>
+    <div class="reco-cell">
+      <div class="rc-label">吉方</div>
+      <div class="rc-value">${r.bestDir}</div>
+      <div class="rc-extra">忌：${r.worstDir}</div>
+    </div>
+    <div class="reco-cell">
+      <div class="rc-label">幸运数字</div>
+      <div class="rc-value">${r.numbers.join(' · ')}</div>
+      <div class="rc-extra">用神色：${r.colors[0]}</div>
+    </div>
+    <div class="reco-cell reco-foods">
+      <div class="rc-label">趋吉饮食 · 配饮</div>
+      <div class="rc-value">${r.foods.join(' · ')} · 配 ${r.drink}</div>
+      <button class="copy-btn" data-copy="${r.foods.join(' · ')} · 配 ${r.drink}">📋 复制菜单</button>
+    </div>
+  `;
+
+  // 塔罗
+  const t = data.tarot;
+  const tarotEl = document.getElementById(`${prefix}-tarot`);
+  tarotEl.innerHTML = `
+    <div class="tarot-card${t.reversed ? ' reversed' : ''}">
+      <div class="t-emoji">${t.emoji}</div>
+      <div class="t-name">${t.name}</div>
+      <div class="t-pos">${t.reversed ? '逆位' : '正位'}</div>
+    </div>
+    <div class="tarot-meaning">
+      <div class="t-up">${t.meaning}</div>
+      <div class="t-down">${t.reversed ? '⚠️ 提醒方向' : '✨ 启示方向'}</div>
+    </div>
+  `;
+
+  // 签到（只在第一次渲染时签）
+  const signed = LuckEngine.autoSign(user.id, data.score);
+  document.getElementById(`${prefix}-streak`).textContent = signed.streak;
+  document.getElementById(`${prefix}-total`).textContent = signed.totalDays;
+
+  // 挑战（基于今日主题十神选 1 条）
+  const ch = pickChallenge(user, data.theme);
+  document.getElementById(`${prefix}-challenge`).textContent = `[${ch.tag}] ${ch.text}`;
+
+  return data;
+}
+
+function pickChallenge(user, theme) {
+  // 基于十神选最匹配 tag 的挑战
+  const map = {
+    '正官': '事业', '七杀': '事业',
+    '正财': '财运', '偏财': '财运',
+    '食神': '心情', '伤官': '社交',
+    '比肩': '社交', '劫财': '健康',
+    '正印': '学习', '偏印': '学习'
+  };
+  const target = map[theme.shiShen] || '心情';
+  const candidates = user.challenges.filter(c => c.tag === target);
+  const pool = candidates.length ? candidates : user.challenges;
+  // 用日期作种子保证当天稳定
+  const idx = new Date().getDate() % pool.length;
+  return pool[idx];
+}
+
+/* ━━━━━━━━━━ 节气专题 ━━━━━━━━━━ */
+function renderJieqi() {
+  const data = LuckEngine.compute(USERS.niu);
+  const today = data.today;
+  if (!today.jieQi) return;
+  const box = document.getElementById('jieqiBox');
+  box.style.display = '';
+  document.getElementById('jieqiContent').innerHTML = `
+    <div style="font-size:18px;font-weight:700;margin-bottom:6px">「${today.jieQi}」交节日 · 能量切换</div>
+    <p style="color:var(--ink-soft);font-size:13px;line-height:1.7">
+      今天是 ${today.jieQi} 节气日，节气日是命理能量的切换点。建议两位都把今天作为"小盘点+小启动"日：
+      上半天复盘上一节气的得失，下半天定下未来 15 天的关键 1-3 件事。
+    </p>
+  `;
+}
+
+/* ━━━━━━━━━━ 大运 3 步（精简：八字+流年用神匹配） ━━━━━━━━━━ */
+function renderDayun() {
+  const box = document.getElementById('dayunBox');
+  const niu = LuckEngine.compute(USERS.niu);
+  const xixi = LuckEngine.compute(USERS.xixi);
+  function blockOf(label, color, baseYear, items) {
+    return `
+      <div style="border-left:3px solid ${color};padding-left:14px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px">${label} · 关键 3 步</div>
+        ${items.map(it => `
+          <div style="margin-bottom:10px">
+            <div style="font-size:12px;color:var(--ink-soft);font-feature-settings:'tnum'">${it.year}（${it.year - baseYear} 年后）· ${it.tag}</div>
+            <div style="font-size:13px">${it.note}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+  const baseYear = new Date().getFullYear();
+  box.innerHTML =
+    blockOf('牛牛 · 乙木用水', '#5C8A6B', baseYear, [
+      { year: 2027, tag: '丁未流年 · 火土泄身', note: '保守稳一手 · 健康优先 · 不要换赛道' },
+      { year: 2031, tag: '辛亥流年 · 水星临门', note: '远行/留学/拓展 · 用神高分窗口' },
+      { year: 2032, tag: '甲子大运启动', note: '十年好运起步 · 正财与正印双高 · 蓄力期收尾' }
+    ]) +
+    blockOf('嘻嘻 · 丙火用水', '#C9A26B', baseYear, [
+      { year: 2027, tag: '丁未流年 · 同火并立', note: '事业上有同辈竞争 · 文昌运高 · 重要考试/作品的黄金年' },
+      { year: 2030, tag: '庚戌流年 · 财官双显', note: '事业进阶/感情明朗双窗口' },
+      { year: 2031, tag: '辛亥流年 · 用神高分', note: '可远行/留学/换城市 · 命理调候到位' }
+    ]);
+}
+
+/* ━━━━━━━━━━ 30 天能量曲线 ━━━━━━━━━━ */
+function renderHistory() {
+  const svg = document.getElementById('historySvg');
+  const stateNiu = LuckEngine.loadState('niu');
+  const stateXixi = LuckEngine.loadState('xixi');
+  const W = 720, H = 140, P = 12;
+  function pathOf(history, color) {
+    if (!history || history.length === 0) return `<text x="${W/2}" y="${H/2}" fill="#999" text-anchor="middle" font-size="11">尚无数据 · 每天来一次自动记录</text>`;
+    const last30 = history.slice(-30);
+    const max = 100, min = 20;
+    const dx = (W - 2 * P) / Math.max(29, last30.length - 1);
+    const pts = last30.map((h, i) => {
+      const x = P + i * dx;
+      const y = H - P - ((h.score - min) / (max - min)) * (H - 2 * P);
+      return [x, y];
+    });
+    const path = pts.map((p, i) => (i === 0 ? `M${p[0]},${p[1]}` : `L${p[0]},${p[1]}`)).join('');
+    const dots = pts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="2.5" fill="${color}" />`).join('');
+    return `<path d="${path}" stroke="${color}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>${dots}`;
+  }
+  svg.innerHTML = `
+    <line x1="${P}" y1="${H-P}" x2="${W-P}" y2="${H-P}" stroke="#e7e2d6" />
+    <line x1="${P}" y1="${P}" x2="${P}" y2="${H-P}" stroke="#e7e2d6" />
+    ${pathOf(stateNiu.history, '#5C8A6B')}
+    ${pathOf(stateXixi.history, '#C9A26B')}
+  `;
+}
+
+/* ━━━━━━━━━━ 视图切换 ━━━━━━━━━━ */
+document.getElementById('viewSwitch').addEventListener('click', e => {
+  if (e.target.tagName !== 'BUTTON') return;
+  const mode = e.target.dataset.mode;
+  document.getElementById('duoWrap').dataset.mode = mode;
+  [...e.currentTarget.children].forEach(b => b.classList.toggle('active', b === e.target));
+  // 写到 localStorage 作为下次默认
+  try { localStorage.setItem('LUCK_default_view', mode); } catch (e) {}
+});
+
+/* ━━━━━━━━━━ 复制按钮 ━━━━━━━━━━ */
+document.body.addEventListener('click', e => {
+  const btn = e.target.closest('.copy-btn');
+  if (!btn) return;
+  navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+    const t = document.getElementById('toast');
+    t.textContent = '已复制：' + btn.dataset.copy.slice(0, 30) + (btn.dataset.copy.length > 30 ? '…' : '');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1500);
+  });
+});
+
+/* ━━━━━━━━━━ 塔罗追问 ━━━━━━━━━━ */
+document.body.addEventListener('click', e => {
+  const btn = e.target.closest('.tarot-ask button');
+  if (!btn) return;
+  const userKey = btn.dataset.user;
+  const input = btn.parentElement.querySelector('input');
+  const q = input.value.trim();
+  const card = LuckEngine.drawTarot(q || null);
+  LuckEngine.pushTarotRecord(userKey, card);
+
+  const tEl = document.getElementById(`${userKey}-tarot`);
+  tEl.innerHTML = `
+    <div class="tarot-card${card.reversed ? ' reversed' : ''}">
+      <div class="t-emoji">${card.emoji}</div>
+      <div class="t-name">${card.name}</div>
+      <div class="t-pos">${card.reversed ? '逆位' : '正位'}</div>
+    </div>
+    <div class="tarot-meaning">
+      ${q ? `<div class="t-up" style="font-size:12px;color:var(--ink-soft)">问：${q}</div>` : ''}
+      <div class="t-up">${card.meaning}</div>
+      <div class="t-down">${card.reversed ? '⚠️ 注意方向' : '✨ 启示方向'}</div>
+    </div>
+  `;
+});
+
+/* ━━━━━━━━━━ 双人关系亮点 ━━━━━━━━━━ */
+function renderCouple() {
+  const r = (window.RELATIONS && window.RELATIONS['niu_xixi']) || null;
+  if (!r) return;
+  const stars = '⭐'.repeat(Math.round(r.score));
+  document.getElementById('csKeyword').textContent = r.keyword;
+  document.getElementById('csScore').textContent = `匹配 ${r.score}/5  ${stars}`;
+  document.getElementById('csEssence').textContent = r.essence;
+  document.getElementById('csToday').innerHTML = `<strong style="color:var(--niu)">今日 · </strong>${r.today}`;
+  document.getElementById('csActions').innerHTML = (r.actions || [])
+    .slice(0, 3)
+    .map(a => `<li>${a}</li>`).join('');
+}
+
+/* ━━━━━━━━━━ Tab 切换 + iframe 懒加载 ━━━━━━━━━━ */
+function setupTabs() {
+  const tabbar = document.getElementById('tabbar');
+  const panes = document.querySelectorAll('.tab-pane');
+  tabbar.addEventListener('click', e => {
+    if (e.target.tagName !== 'BUTTON') return;
+    const tab = e.target.dataset.tab;
+    [...tabbar.children].forEach(b => b.classList.toggle('active', b === e.target));
+    panes.forEach(p => p.classList.toggle('active', p.id === `tab-${tab}`));
+    // iframe 懒加载
+    const pane = document.getElementById(`tab-${tab}`);
+    const iframe = pane.querySelector('iframe[data-src]');
+    if (iframe && !iframe.src) {
+      iframe.src = iframe.dataset.src;
+    }
+  });
+}
+
+/* ━━━━━━━━━━ 默认视角 ━━━━━━━━━━ */
+function applyDefaultView() {
+  const params = new URLSearchParams(location.search);
+  let mode = params.get('u');
+  if (!mode) {
+    mode = localStorage.getItem('LUCK_default_view') || 'duo';
+  }
+  if (!['duo', 'niu', 'xixi'].includes(mode)) mode = 'duo';
+  document.getElementById('duoWrap').dataset.mode = mode;
+  // 高亮按钮
+  const switchEl = document.getElementById('viewSwitch');
+  [...switchEl.children].forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+}
+
+/* ━━━━━━━━━━ 启动 ━━━━━━━━━━ */
+function refreshAll() {
+  render('niu');
+  render('xixi');
+  updateLiveGanzhi();
+  renderCouple();
+}
+
+setupTabs();
+applyDefaultView();
+refreshAll();
+renderJieqi();
+renderDayun();
+renderHistory();
+
+// 每分钟刷新当前时段相关
+setInterval(() => {
+  // 不重新签到（autoSign 内已防重）
+  render('niu');
+  render('xixi');
+}, 60 * 1000);
+</script>
+</body>
+</html>
