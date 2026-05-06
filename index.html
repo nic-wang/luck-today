@@ -103,7 +103,7 @@
   @media (max-width: 980px) {
     .duo-wrap { grid-template-columns: 1fr; }
     main { padding: 16px; }
-    .topbar { padding: 12px 16px; }
+    .topbar { padding: calc(12px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 12px calc(16px + env(safe-area-inset-left)); }
     .live-stamp { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-size: 12px; }
     .live-stamp .sep { display: none; }
   }
@@ -112,7 +112,7 @@
   @media (max-width: 600px) {
     body { font-size: 13px; }
     main { padding: 12px; }
-    .topbar { padding: 10px 12px; gap: 10px; }
+    .topbar { padding: calc(10px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) 10px calc(12px + env(safe-area-inset-left)); gap: 10px; }
     .topbar .brand h1 { font-size: 15px; }
     .topbar .brand p { display: none; }
     .live-stamp {
@@ -148,7 +148,7 @@
     .cs-link .cs-keyword { font-size: 14px; }
     .cs-link .cs-score { font-size: 11px; }
     .embed-wrap iframe { height: calc(100vh - 130px); min-height: 520px; }
-    footer { padding: 20px 12px; }
+    footer { padding: 20px 12px calc(20px + env(safe-area-inset-bottom)) 12px; }
   }
 
   /* ━━━━━━━━━━ 通用卡片 ━━━━━━━━━━ */
