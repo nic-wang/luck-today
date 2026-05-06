@@ -18,11 +18,17 @@ assets/photos/         头像
 
 - vanilla JS · 无构建 · 纯静态
 - `lunar-javascript` UMD 农历八字
+- sessionStorage 做 PIN 门（每次访问都要输入）
 - localStorage 签到历史
 
 ## 部署
 
-Vercel 直接连接此仓库 · 自动部署
+**GitHub Pages** · 推到 `main` 后自动构建 · 线上地址 https://nic-wang.github.io/luck-today/
+
+```bash
+# 本地改完 → 推上去即可
+git add -A && git commit -m "…" && git push
+```
 
 ## 隐私
 
