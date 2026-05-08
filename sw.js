@@ -9,7 +9,7 @@
  * 升级流程：改了代码想强制用户拿新版 → 改下面的 VERSION，push 后客户端会自动清旧缓存
  */
 
-const VERSION = 'v4-20260508';
+const VERSION = 'v5-20260508-step-c';
 const CACHE_NAME = `luck-today-${VERSION}`;
 
 // 首次访问预缓存清单
@@ -20,6 +20,9 @@ const PRECACHE = [
   './lib/gate.js',
   './lib/luck-engine.js',
   './lib/relations.js',
+  './lib/members.js',
+  './lib/app.js',
+  './lib/family.js',
   './vendor/lunar.js',
   './manifest.json',
   './assets/icons/icon-192.png',
