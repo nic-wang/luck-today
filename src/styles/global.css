@@ -793,16 +793,17 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 }
 .pin-dots span.filled { background: #fff; }
 .pin-card input {
-  width: 130px;
-  height: 42px;
-  margin: 0 auto;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.08);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: transparent;
   caret-color: transparent;
   outline: 0;
-  display: block;
+  opacity: 0;
 }
 .pin-card.shake { animation: shake 0.35s ease; }
 @keyframes shake {
@@ -1109,3 +1110,138 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 }
 .theme-toggle:hover { color: var(--ink); }
 .theme-toggle .icon { font-size: 14px; line-height: 1; }
+
+/* ============= Fortune Page (大运 / 流年 / 流月) ============= */
+.fortune-page { display: grid; gap: 18px; }
+.fortune-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+}
+.fortune-hero h2 {
+  margin: 6px 0 8px;
+  font-size: clamp(28px, 4vw, 42px);
+}
+.fortune-hero .muted { font-size: 14px; line-height: 1.7; color: var(--ink-soft); }
+
+.decade-rail {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+.decade-chip {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding: 14px 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  transition: transform .15s ease, border-color .15s ease;
+}
+.decade-chip:hover { transform: translateY(-1px); border-color: var(--accent, #5c8a6b); }
+.decade-chip .decade-no {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.decade-chip strong {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.decade-chip em {
+  font-style: normal;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.decade-chip em.years { font-size: 11px; color: var(--muted); }
+.decade-chip.is-current { border-color: #45865d; background: rgba(69, 134, 93, 0.08); }
+.decade-chip.is-picked {
+  outline: 2px solid var(--ink);
+  outline-offset: -1px;
+}
+.decade-chip .now-tag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  background: #45865d;
+  color: #fff;
+}
+
+.year-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+}
+.year-cell {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding: 12px 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.year-cell .age { font-size: 11px; color: var(--muted); font-weight: 700; }
+.year-cell strong { font-size: 18px; font-weight: 800; }
+.year-cell em { font-style: normal; font-size: 13px; color: var(--ink-soft); }
+.year-cell.is-current { border-color: #c59b55; background: rgba(197, 155, 85, 0.08); }
+.year-cell .now-tag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  background: #c59b55;
+  color: #fff;
+}
+
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+.month-cell {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  text-align: center;
+}
+.month-cell span { font-size: 11px; color: var(--muted); font-weight: 700; }
+.month-cell strong { font-size: 16px; font-weight: 800; }
+.month-cell.is-current { border-color: #8193c9; background: rgba(129, 147, 201, 0.1); }
+.month-cell .now-tag {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  background: #8193c9;
+  color: #fff;
+}
+.muted.small { font-size: 12px; color: var(--muted); margin: 10px 0 0; }
+
+@media (max-width: 639px) {
+  .fortune-hero { grid-template-columns: 1fr; }
+  .decade-rail { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  .month-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
