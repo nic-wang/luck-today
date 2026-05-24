@@ -1,0 +1,130 @@
+import type { MemberProfile } from '../types';
+
+export const members: MemberProfile[] = [
+  {
+    id: 'niu',
+    name: '牛牛',
+    alias: '王宁',
+    kind: 'human',
+    role: '人 · 主理',
+    color: '#5C8A6B',
+    colorBg: '#E2EDE5',
+    photo: 'assets/photos/牛牛-像素图.jpg',
+    photoPos: 'center center',
+    birthDate: '1989-05-15',
+    birthHour: 14,
+    gender: '男',
+    bazi: '己巳·己巳·乙亥·癸未',
+    zodiac: '🐍 蛇',
+    wuxing: '乙木',
+    yong: '水',
+    mainWuxing: '木',
+    chips: ['乙木', '用神水', '🐍蛇', '驿马已激活'],
+    highlight: '乙木藤蔓 · 初夏巳月炎燥 · 火旺土重木弱金严重不足 · 用神水调候 · 当前乙丑积累期（2022-2031）· 2032 甲子大爆发',
+    challenges: [
+      { tag: '事业', text: '主动请教一个具体问题，并记录成下一步动作' },
+      { tag: '财运', text: '记录所有支出，找出一笔可以省下的' },
+      { tag: '健康', text: '做 10 分钟肩颈拉伸' },
+      { tag: '社交', text: '给一位 30 天没联系的朋友发个问候' }
+    ]
+  },
+  {
+    id: 'xixi',
+    name: '嘻嘻',
+    alias: '郭玉玺',
+    kind: 'human',
+    role: '人 · 主出镜',
+    color: '#C9A26B',
+    colorBg: '#F5EBD8',
+    photo: 'assets/photos/嘻嘻-像素图.jpg',
+    photoPos: 'center center',
+    birthDate: '1999-06-03',
+    birthHour: 22,
+    gender: '女',
+    bazi: '己卯·己巳·丙戌·己亥',
+    zodiac: '🐰 兔',
+    wuxing: '丙火',
+    yong: '水',
+    mainWuxing: '火',
+    chips: ['丙火', '用神水', '🐰兔', '巳月帝旺'],
+    highlight: '丙火太阳 · 巳月帝旺身强 · 用神水调候制旺火 · 紫微财帛太阳+巨门 · 2027 文昌黄金年 · 2031 辛亥留学窗',
+    challenges: [
+      { tag: '形象', text: '搭一身自己满意的造型并自拍存档' },
+      { tag: '社交', text: '给喜欢的人发一句感谢' },
+      { tag: '心情', text: '写下 3 件让自己开心的小事' },
+      { tag: '健康', text: '睡前 30 分钟不刷手机' }
+    ]
+  },
+  {
+    id: 'paopao',
+    name: '泡泡',
+    alias: '黄条条 · 条条',
+    kind: 'pet',
+    role: '田园橘猫',
+    color: '#A8C4D6',
+    colorBg: '#E8F0F5',
+    photo: 'assets/photos/泡泡-像素图.png',
+    birthDate: '2021-04-16',
+    bazi: '辛丑·壬辰',
+    zodiac: '🐂 牛',
+    wuxing: '辛金 + 壬水',
+    mainWuxing: '水',
+    chips: ['辛金', '壬水', '🐂牛', '丙辛合水'],
+    highlight: '辛金生壬水 · 名字带水气 · 与嘻嘻产生“丙辛合水” · 全家唯一合化关系'
+  },
+  {
+    id: 'dandan',
+    name: '蛋蛋',
+    alias: '曼基康深灰',
+    kind: 'pet',
+    role: '柯基猫 · 实际最大',
+    color: '#6B8FA8',
+    colorBg: '#DCE6EE',
+    photo: 'assets/photos/蛋蛋-像素图.jpg',
+    birthDate: '2020-07-26',
+    bazi: '庚子·癸未',
+    zodiac: '🐀 鼠',
+    wuxing: '庚金 + 子癸双水',
+    mainWuxing: '水',
+    chips: ['庚金', '子+癸双水', '🐀鼠', '水库'],
+    highlight: '全家最强水库 · 庚子双水（子+癸）+ 庚金生水 · 与牛牛“乙庚合金”加固结构'
+  },
+  {
+    id: 'xiaowu',
+    name: '小五',
+    alias: '金渐层',
+    kind: 'pet',
+    role: '金渐层短毛',
+    color: '#92B884',
+    colorBg: '#E0EBD8',
+    photo: 'assets/photos/小五-像素图.png',
+    birthDate: '2022-03-09',
+    bazi: '壬寅·癸卯',
+    zodiac: '🐯 虎',
+    wuxing: '壬癸双水 + 寅卯双木',
+    mainWuxing: '水',
+    chips: ['壬癸双水', '寅卯木', '🐯虎', '挚友'],
+    highlight: '水木顶配 · 与牛牛乙木同类共振 + 双水滋润 · 嘻嘻的灭火解药'
+  },
+  {
+    id: 'xiaomiji',
+    name: '小米鸡',
+    alias: '糯米鸡 · 绿和尚',
+    kind: 'pet',
+    role: '绿和尚鹦鹉',
+    color: '#C8B870',
+    colorBg: '#F0EBD0',
+    photo: 'assets/photos/糯米鸡-像素图.png',
+    birthDate: '2026-03-05',
+    bazi: '丙午·庚寅',
+    zodiac: '🐎 马',
+    wuxing: '丙午双火 + 庚金 + 寅木',
+    mainWuxing: '火',
+    chips: ['丙午双火', '🐎马', '幼鸟期', '⚠️火警'],
+    highlight: '全家最火 · 丙午年柱 + 寅木助火 · 名字“糯米鸡（水土金）”反向补救火气'
+  }
+];
+
+export const memberMap = Object.fromEntries(members.map(member => [member.id, member])) as Record<string, MemberProfile>;
+
+export const primaryMemberIds = ['niu', 'xixi'];

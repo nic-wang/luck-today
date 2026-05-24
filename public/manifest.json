@@ -1,0 +1,38 @@
+{
+  "name": "命理今日",
+  "short_name": "命理",
+  "description": "私人日运 OS · 今日简报 · 家庭关系 · 解释型算法",
+  "start_url": "/luck-today/",
+  "scope": "/luck-today/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#f6f7f4",
+  "background_color": "#f6f7f4",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
