@@ -1,4 +1,25 @@
-import type { AlgorithmVersion, DailyLuckResult } from '../../types';
+import type { AlgorithmFactor, AlgorithmVersion, DailyLuckResult, LuckTier } from '../../types';
+
+const TIER_LABEL: Record<LuckTier, string> = {
+  deterministic: '确定层',
+  interpretive: '解释层',
+  ritual: '仪式层'
+};
+
+function FactorBlock({ factor }: { factor: AlgorithmFactor }) {
+  const dots = Math.max(1, Math.min(5, Math.round(factor.weight * 5)));
+  return (
+    <div className={`factor factor-${factor.tier}`}>
+      <div className="factor-head">
+        <span className="factor-tier-chip" data-tier={factor.tier}>{TIER_LABEL[factor.tier]}</span>
+        <span className="label">{factor.label}</span>
+        <span className="factor-weight" title={`权重 ${factor.weight.toFixed(2)}`}>{'·'.repeat(dots)}</span>
+      </div>
+      <strong>{factor.value}</strong>
+      <p>{factor.explanation}</p>
+    </div>
+  );
+}
 
 export function ExplainPanel({ version, daily }: { version: AlgorithmVersion; daily: DailyLuckResult[] }) {
   const primary = daily[0];
@@ -58,15 +79,17 @@ export function ExplainPanel({ version, daily }: { version: AlgorithmVersion; da
                 </div>
               ))}
             </div>
-            <div className="factor-list">
-              {item.factors.map(factor => (
-                <div key={factor.id} className={`factor factor-${factor.tier}`}>
-                  <span>{factor.tier}</span>
-                  <strong>{factor.label} · {factor.value}</strong>
-                  <p>{factor.explanation}</p>
-                </div>
-              ))}
-            </div>
+            <details className="explain-details" open>
+              <summary>
+                <span>为什么这样算</span>
+                <b>{item.factors.length} 个因子</b>
+              </summary>
+              <div className="factor-list">
+                {item.factors.map(factor => (
+                  <FactorBlock key={factor.id} factor={factor} />
+                ))}
+              </div>
+            </details>
           </article>
         ))}
       </section>

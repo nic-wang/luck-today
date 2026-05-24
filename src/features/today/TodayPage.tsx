@@ -1,6 +1,27 @@
 import type { CSSProperties } from 'react';
 import { useState } from 'react';
-import type { DailyLuckResult, MemberProfile } from '../../types';
+import type { AlgorithmFactor, DailyLuckResult, LuckTier, MemberProfile } from '../../types';
+
+const TIER_LABEL: Record<LuckTier, string> = {
+  deterministic: '确定层',
+  interpretive: '解释层',
+  ritual: '仪式层'
+};
+
+function FactorBlock({ factor }: { factor: AlgorithmFactor }) {
+  const dots = Math.max(1, Math.min(5, Math.round(factor.weight * 5)));
+  return (
+    <div className={`factor factor-${factor.tier}`}>
+      <div className="factor-head">
+        <span className="factor-tier-chip" data-tier={factor.tier}>{TIER_LABEL[factor.tier]}</span>
+        <span className="label">{factor.label}</span>
+        <span className="factor-weight" title={`权重 ${factor.weight.toFixed(2)}`}>{'·'.repeat(dots)}</span>
+      </div>
+      <strong>{factor.value}</strong>
+      <p>{factor.explanation}</p>
+    </div>
+  );
+}
 
 export function TodayPage({
   daily,
@@ -75,11 +96,7 @@ export function TodayPage({
         </summary>
         <div className="factor-list compact">
           {focus.factors.map(factor => (
-            <div key={factor.id} className={`factor factor-${factor.tier}`}>
-              <span>{factor.label}</span>
-              <strong>{factor.value}</strong>
-              <p>{factor.explanation}</p>
-            </div>
+            <FactorBlock key={factor.id} factor={factor} />
           ))}
         </div>
       </details>

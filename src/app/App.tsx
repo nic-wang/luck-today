@@ -6,6 +6,7 @@ import { ExplainPanel } from '../features/explain/ExplainPanel';
 import { FamilyBoard } from '../features/family/FamilyBoard';
 import { TodayPage } from '../features/today/TodayPage';
 import { usePinGate } from './usePinGate';
+import { useTheme, type ThemeMode } from './useTheme';
 
 type ViewKey = 'today' | 'family' | 'explain';
 
@@ -19,6 +20,7 @@ export function App() {
   const [view, setView] = useState<ViewKey>('today');
   const [focusId, setFocusId] = useState(primaryMemberIds[0]);
   const { passed, error, submit, isPwa } = usePinGate();
+  const { mode, cycle } = useTheme();
   const today = useMemo(() => new Date(), []);
   const daily = useMemo(() => {
     return primaryMemberIds.map(id => {
@@ -54,6 +56,7 @@ export function App() {
               {item.label}
             </button>
           ))}
+          <ThemeToggle mode={mode} onCycle={cycle} />
         </nav>
       </header>
 
@@ -68,6 +71,24 @@ export function App() {
       {view === 'family' && <FamilyBoard members={members} relations={relations} date={today} />}
       {view === 'explain' && <ExplainPanel version={algorithmVersion} daily={daily} />}
     </div>
+  );
+}
+
+function ThemeToggle({ mode, onCycle }: { mode: ThemeMode; onCycle: () => void }) {
+  const label = mode === 'auto' ? '跟随系统' : mode === 'light' ? '浅色' : '深色';
+  const icon = mode === 'auto' ? '◐' : mode === 'light' ? '☀' : '☾';
+  const next = mode === 'auto' ? '切到浅色' : mode === 'light' ? '切到深色' : '切回跟随系统';
+  return (
+    <button
+      type="button"
+      className="theme-toggle"
+      onClick={onCycle}
+      aria-label={`主题：${label}，点击${next}`}
+      title={`主题：${label}（${next}）`}
+    >
+      <span className="icon" aria-hidden="true">{icon}</span>
+      <span>{label}</span>
+    </button>
   );
 }
 
