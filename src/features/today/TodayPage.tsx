@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { useState } from 'react';
+import type { QimenChart } from '../../engine/adapters/taobi';
 import type { AlgorithmFactor, DailyLuckResult, LuckTier, MemberProfile } from '../../types';
 
 const TIER_LABEL: Record<LuckTier, string> = {
@@ -176,6 +177,8 @@ function DailyDetail({ item, member }: { item: DailyLuckResult; member: MemberPr
 
       <TarotBlock item={item} question={tarotQuestion} setQuestion={setTarotQuestion} drawn={drawn} setDrawn={setDrawn} />
 
+      {item.qimen && <QimenPanel chart={item.qimen} />}
+
       {challenge && (
         <section className="challenge-panel">
           <p className="eyebrow">今日挑战</p>
@@ -259,5 +262,39 @@ function TarotBlock({
         </div>
       )}
     </section>
+  );
+}
+
+function QimenPanel({ chart }: { chart: QimenChart }) {
+  return (
+    <details className="qimen-panel">
+      <summary>
+        <span><span className="dot" /> 流日方位盘 · 奇门九宫</span>
+        <b>值符 {chart.zhiFu || '—'}{chart.solarTerm ? ` · ${chart.solarTerm}` : ''}</b>
+      </summary>
+      <div className="qimen-grid" role="grid" aria-label="奇门九宫">
+        {chart.cells.map((cell, i) => (
+          <article
+            key={i}
+            className={`qimen-cell${cell.isCenter ? ' is-center' : ''}`}
+            role="gridcell"
+          >
+            <header>
+              <span className="qm-palace">{cell.palace}</span>
+              {cell.gan && <span className="qm-gan">{cell.gan}</span>}
+            </header>
+            {!cell.isCenter && (
+              <>
+                <p className="qm-shen">神 · {cell.shen || '—'}</p>
+                <p className="qm-men">门 · {cell.men || '—'}</p>
+                <p className="qm-star">星 · {cell.star || '—'}</p>
+              </>
+            )}
+            {cell.isCenter && <p className="qm-center-note">中宫寄二 · 仅作参照</p>}
+          </article>
+        ))}
+      </div>
+      <p className="muted small">奇门为流派推断层（interpretive），不进入核心分数。点上方收起。</p>
+    </details>
   );
 }

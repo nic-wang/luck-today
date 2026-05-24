@@ -11,6 +11,7 @@ import type {
   Wuxing
 } from '../types';
 import { TAROT_RWS_78 } from '../data/tarot-rws-78';
+import { computeQimen, qimenFactor } from './adapters/taobi';
 
 export const algorithmVersion: AlgorithmVersion = {
   version: 'v2.0-explainable',
@@ -290,11 +291,14 @@ export function computeDailyLuck(member: MemberProfile, date = new Date()): Dail
   const reversed = stableHash(`${today.ganzhi}-${member.id}-reversed`) % 10 < 4;
   const extensions = genDailyExtensions(member, theme, targetWx, avoidWx, todayWx);
   const radar = radarFrom(dimensions, score, targetWx, current, theme);
+  const qimen = computeQimen(date);
+  const qmFactor = qimenFactor(qimen);
   const factors: AlgorithmFactor[] = [
     { id: 'calendar', label: '流日干支', value: today.ganzhi, weight: 1, tier: 'deterministic', explanation: `lunar.js 计算今日为 ${today.ganzhi} 日，${todayWx}气主导。` },
     { id: 'personal-yong', label: '个人用神', value: bazi.yong, weight: 0.9, tier: 'deterministic', explanation: `${member.name} 当前按 ${member.wuxing} / 用神${bazi.yong} 做调候主轴。` },
     { id: 'shishen', label: '十神主题', value: shiShen, weight: 0.75, tier: 'interpretive', explanation: `以个人日干 ${bazi.dayGan} 对今日天干 ${today.dayGan} 推出 ${shiShen}。` },
     { id: 'hour-gate', label: '时辰门', value: current.gate, weight: 0.45, tier: 'interpretive', explanation: `当前 ${current.zhi}时落 ${current.gate}，用于生成即时行动建议。` },
+    ...(qmFactor ? [qmFactor] : []),
     { id: 'ritual-card', label: '塔罗仪式牌', value: tarot.name, weight: 0.15, tier: 'ritual', explanation: '塔罗只做每日仪式感，不进入核心分数。' }
   ];
   const label = score >= 76 ? '顺势推进' : score >= 60 ? '稳中有机' : score >= 45 ? '低速蓄能' : '避峰守住';
@@ -344,7 +348,8 @@ export function computeDailyLuck(member: MemberProfile, date = new Date()): Dail
       suit: tarot.suit
     },
     factors,
-    explanation: `综合 ${today.ganzhi} 流日、${shiShen}主题、用神${bazi.yong}和当前${current.zhi}时${current.gate}，今日建议为“${label}”。`
+    explanation: `综合 ${today.ganzhi} 流日、${shiShen}主题、用神${bazi.yong}和当前${current.zhi}时${current.gate}，今日建议为“${label}”。`,
+    qimen
   };
 }
 

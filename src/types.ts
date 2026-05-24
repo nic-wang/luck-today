@@ -115,6 +115,7 @@ export interface DailyLuckResult {
   };
   factors: AlgorithmFactor[];
   explanation: string;
+  qimen?: import('./engine/adapters/taobi').QimenChart | null;
 }
 
 export interface AlgorithmVersion {

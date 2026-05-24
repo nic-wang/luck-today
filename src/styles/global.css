@@ -1106,6 +1106,90 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   border: 1px solid var(--line);
   letter-spacing: 0.04em;
 }
+
+/* ============= Qimen 9-grid ============= */
+.qimen-panel {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.qimen-panel > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 800;
+  list-style: none;
+  gap: 12px;
+}
+.qimen-panel > summary::-webkit-details-marker { display: none; }
+.qimen-panel > summary > span { display: inline-flex; align-items: center; }
+.qimen-panel > summary > b {
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.qimen-grid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.qimen-cell {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding: 12px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  font-size: 12px;
+  line-height: 1.5;
+  min-height: 96px;
+}
+.qimen-cell header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.qm-palace {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink);
+}
+.qm-gan {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(197, 155, 85, 0.15);
+  color: #8a6f3b;
+  border: 1px solid rgba(197, 155, 85, 0.4);
+}
+.qimen-cell p { margin: 0; color: var(--ink-soft); font-size: 11px; }
+.qm-shen { color: #8a3d33; }
+.qm-men { color: #3f7c55; }
+.qm-star { color: #5b6f9a; }
+.qimen-cell.is-center {
+  background: linear-gradient(145deg, rgba(23, 33, 27, 0.04), var(--surface));
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+}
+.qimen-cell.is-center .qm-center-note {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+@media (max-width: 639px) {
+  .qimen-cell { min-height: 84px; padding: 10px 8px; }
+  .qm-palace { font-size: 12px; }
+  .qimen-cell p { font-size: 10.5px; }
+}
 .theme-toggle {
   display: inline-flex;
   align-items: center;
