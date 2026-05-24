@@ -23,6 +23,22 @@ function FactorBlock({ factor }: { factor: AlgorithmFactor }) {
   );
 }
 
+const SUIT_LABEL: Record<NonNullable<DailyLuckResult['tarot']['suit']>, string> = {
+  wands: '权杖 · 火',
+  cups: '圣杯 · 水',
+  swords: '宝剑 · 风',
+  pentacles: '钱币 · 土'
+};
+
+function tarotArcanaLabel(
+  arcana: DailyLuckResult['tarot']['arcana'],
+  suit: DailyLuckResult['tarot']['suit']
+): string {
+  if (arcana === 'major') return '大阿尔卡纳';
+  if (arcana === 'minor' && suit) return `小阿尔卡纳 · ${SUIT_LABEL[suit]}`;
+  return '';
+}
+
 export function TodayPage({
   daily,
   focusId,
@@ -209,7 +225,7 @@ function TarotBlock({
     <section className="tarot-result">
       <div className="panel-title">
         <p className="eyebrow"><span className="dot" /> 今日塔罗 · 抽牌结果</p>
-        <h4>{item.tarot.name} · {item.tarot.reversed ? '逆位' : '正位'}</h4>
+        <h4>{item.tarot.name} · {item.tarot.reversed ? '逆位' : '正位'} <span className="tarot-arcana-tag">{tarotArcanaLabel(item.tarot.arcana, item.tarot.suit)}</span></h4>
       </div>
       <div className="tarot-layout">
         <div className={`tarot-face ${item.tarot.reversed ? 'reversed' : ''}`}>

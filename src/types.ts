@@ -110,6 +110,8 @@ export interface DailyLuckResult {
     advice: string;
     action: string;
     tier: LuckTier;
+    arcana?: 'major' | 'minor';
+    suit?: 'wands' | 'cups' | 'swords' | 'pentacles';
   };
   factors: AlgorithmFactor[];
   explanation: string;

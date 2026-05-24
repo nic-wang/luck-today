@@ -10,6 +10,7 @@ import type {
   TimeWindow,
   Wuxing
 } from '../types';
+import { TAROT_RWS_78 } from '../data/tarot-rws-78';
 
 export const algorithmVersion: AlgorithmVersion = {
   version: 'v2.0-explainable',
@@ -83,29 +84,7 @@ const GATE_INFO: Record<string, Pick<TimeWindow, 'luck' | 'advice'>> = {
   惊门: { luck: '凶', advice: '保持警觉、防意外' }
 };
 
-const TAROT: Array<{
-  id: number;
-  name: string;
-  en: string;
-  emoji: string;
-  keywords: string[];
-  core: string;
-  upright: string;
-  reversed: string;
-  advice: string;
-  action: string;
-}> = [
-  { id: 0, name: '愚者', en: 'The Fool', emoji: '🃏', keywords: ['新开始', '冒险', '自由'], core: '未知之旅的起点，重点不是莽撞，而是轻装上路。', upright: '可以开一个小新局。', reversed: '先别跳，摸清边界。', advice: '选一个成本低、反馈快的新动作。', action: '今天只迈第一步，不做终局承诺。' },
-  { id: 1, name: '魔术师', en: 'The Magician', emoji: '🎩', keywords: ['资源', '行动', '连接'], core: '工具已经在手里，关键是把意图落到一个动作。', upright: '资源可调用，适合启动。', reversed: '小心只讲概念不落地。', advice: '把散落资源连成一个可交付。', action: '列出手头 3 个资源，立刻组合成一个输出。' },
-  { id: 2, name: '女祭司', en: 'The High Priestess', emoji: '🌙', keywords: ['直觉', '观察', '静心'], core: '答案不一定在外部信息里，先听见自己的判断。', upright: '少说多听，容易看到暗线。', reversed: '别把直觉压成焦虑。', advice: '先记录感觉，再判断事实。', action: '写下一个隐约不对劲的点，晚上再复核。' },
-  { id: 4, name: '皇帝', en: 'The Emperor', emoji: '⚔️', keywords: ['结构', '边界', '秩序'], core: '用规则对抗混乱，先立边界再推进。', upright: '适合定规则、排优先级。', reversed: '别把控制感当安全感。', advice: '把一件乱事压成 3 条规则。', action: '今天只守一个最关键边界。' },
-  { id: 6, name: '恋人', en: 'The Lovers', emoji: '💞', keywords: ['关系', '选择', '对齐'], core: '关系需要明确选择，模糊会消耗双方。', upright: '适合表达真实偏好。', reversed: '小心逃避选择。', advice: '把“我想要什么”说清楚。', action: '对重要的人做一次不拐弯的表达。' },
-  { id: 9, name: '隐士', en: 'The Hermit', emoji: '🕯️', keywords: ['复盘', '独处', '找光'], core: '独处不是退缩，是为了看清下一步。', upright: '适合深度整理。', reversed: '别把独处变成回避沟通。', advice: '关掉输入，留出思考窗口。', action: '留 30 分钟无通知时间。' },
-  { id: 10, name: '命运之轮', en: 'Wheel of Fortune', emoji: '🎡', keywords: ['转折', '周期', '顺势'], core: '事情在变动，顺势比硬推省力。', upright: '留意新机会。', reversed: '暂时卡住也是周期一部分。', advice: '看清趋势，不要只看当下情绪。', action: '抓住今天出现的一次小转机。' },
-  { id: 14, name: '节制', en: 'Temperance', emoji: '🍷', keywords: ['平衡', '调和', '耐心'], core: '把两种能量调在一起，速度慢一点更稳。', upright: '适合协调和修复。', reversed: '小心两头摇摆。', advice: '不要走极端，给双方都留余地。', action: '把一个冲突改成折中方案。' },
-  { id: 17, name: '星星', en: 'The Star', emoji: '⭐', keywords: ['希望', '修复', '长期'], core: '恢复信心靠小而连续的事，不靠突然爆发。', upright: '适合修复节奏。', reversed: '别因为短期低分否定长期。', advice: '做一件能恢复信心的小事。', action: '补一个会让明天更轻松的动作。' },
-  { id: 19, name: '太阳', en: 'The Sun', emoji: '☀️', keywords: ['明朗', '展示', '确认'], core: '把成果放到光下，反馈会比猜测更有用。', upright: '适合表达、展示、出场。', reversed: '别为了被看见而过度表演。', advice: '拿出一个真实成果。', action: '今天给一个人看你的阶段性结果。' }
-];
+const TAROT = TAROT_RWS_78;
 
 function solar() {
   const globals = globalThis as typeof globalThis & LunarGlobals;
@@ -360,7 +339,9 @@ export function computeDailyLuck(member: MemberProfile, date = new Date()): Dail
       question: `今天我应该如何处理“${theme.title}”？`,
       advice: tarot.advice,
       action: tarot.action,
-      tier: 'ritual'
+      tier: 'ritual',
+      arcana: tarot.arcana,
+      suit: tarot.suit
     },
     factors,
     explanation: `综合 ${today.ganzhi} 流日、${shiShen}主题、用神${bazi.yong}和当前${current.zhi}时${current.gate}，今日建议为“${label}”。`
