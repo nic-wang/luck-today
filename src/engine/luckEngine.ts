@@ -3,7 +3,6 @@ import type {
   AlgorithmVersion,
   DailyLuckResult,
   LuckTier,
-  LunarGlobals,
   MemberProfile,
   RelationProfile,
   RelationTodayResult,
@@ -12,12 +11,13 @@ import type {
 } from '../types';
 import { TAROT_RWS_78 } from '../data/tarot-rws-78';
 import { computeQimen, qimenFactor } from './adapters/taobi';
+import { buildBazi, buildToday } from './adapters/tyme4ts-bazi';
 
 export const algorithmVersion: AlgorithmVersion = {
   version: 'v2.0-explainable',
   title: '解释型日运 v2',
   notes: [
-    '农历/干支计算来自 lunar.js，属于确定层',
+    '农历/干支计算来自 tyme4ts（VSOP87D 节气），属于确定层',
     '时辰、飞星、推荐、塔罗属于解释层或仪式层',
     '每个分数必须带可追溯因子'
   ]
@@ -87,12 +87,6 @@ const GATE_INFO: Record<string, Pick<TimeWindow, 'luck' | 'advice'>> = {
 
 const TAROT = TAROT_RWS_78;
 
-function solar() {
-  const globals = globalThis as typeof globalThis & LunarGlobals;
-  if (!globals.Solar) throw new Error('vendor/lunar.js 未加载');
-  return globals.Solar;
-}
-
 function stableHash(input: string): number {
   let h = 0;
   for (let i = 0; i < input.length; i += 1) h = ((h * 31) + input.charCodeAt(i)) | 0;
@@ -117,14 +111,7 @@ function getShiShen(dayGan: string, otherGan: string): string {
 
 function baziFor(member: MemberProfile) {
   const [year, month, day] = member.birthDate.split('-').map(Number);
-  const lunar = solar().fromYmdHms(year, month, day, member.birthHour ?? 12, 0, 0).getLunar();
-  const eight = lunar.getEightChar();
-  const pillars = {
-    yearGan: eight.getYearGan(), yearZhi: eight.getYearZhi(),
-    monthGan: eight.getMonthGan(), monthZhi: eight.getMonthZhi(),
-    dayGan: eight.getDayGan(), dayZhi: eight.getDayZhi(),
-    timeGan: eight.getTimeGan(), timeZhi: eight.getTimeZhi()
-  };
+  const pillars = buildBazi(year, month, day, member.birthHour ?? 12);
   return {
     ...pillars,
     dayWx: TIANGAN_WUXING[pillars.dayGan],
@@ -133,15 +120,15 @@ function baziFor(member: MemberProfile) {
 }
 
 function todayFor(date: Date) {
-  const lunar = solar().fromYmdHms(date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds()).getLunar();
+  const t = buildToday(date);
   return {
-    yearGan: lunar.getYearGan(), yearZhi: lunar.getYearZhi(),
-    monthGan: lunar.getMonthGan(), monthZhi: lunar.getMonthZhi(),
-    dayGan: lunar.getDayGan(), dayZhi: lunar.getDayZhi(),
-    timeGan: lunar.getTimeGan(), timeZhi: lunar.getTimeZhi(),
-    lunar: `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月 ${lunar.getDayInChinese()}`,
-    ganzhi: `${lunar.getDayGan()}${lunar.getDayZhi()}`,
-    animal: SHENGXIAO[lunar.getDayZhi()]
+    yearGan: t.yearGan, yearZhi: t.yearZhi,
+    monthGan: t.monthGan, monthZhi: t.monthZhi,
+    dayGan: t.dayGan, dayZhi: t.dayZhi,
+    timeGan: t.timeGan, timeZhi: t.timeZhi,
+    lunar: `${t.yearInGanZhi}年 ${t.monthInChinese}月 ${t.dayInChinese}`,
+    ganzhi: `${t.dayGan}${t.dayZhi}`,
+    animal: SHENGXIAO[t.dayZhi]
   };
 }
 
@@ -294,7 +281,7 @@ export function computeDailyLuck(member: MemberProfile, date = new Date()): Dail
   const qimen = computeQimen(date);
   const qmFactor = qimenFactor(qimen);
   const factors: AlgorithmFactor[] = [
-    { id: 'calendar', label: '流日干支', value: today.ganzhi, weight: 1, tier: 'deterministic', explanation: `lunar.js 计算今日为 ${today.ganzhi} 日，${todayWx}气主导。` },
+    { id: 'calendar', label: '流日干支', value: today.ganzhi, weight: 1, tier: 'deterministic', explanation: `tyme4ts 计算今日为 ${today.ganzhi} 日，${todayWx}气主导。` },
     { id: 'personal-yong', label: '个人用神', value: bazi.yong, weight: 0.9, tier: 'deterministic', explanation: `${member.name} 当前按 ${member.wuxing} / 用神${bazi.yong} 做调候主轴。` },
     { id: 'shishen', label: '十神主题', value: shiShen, weight: 0.75, tier: 'interpretive', explanation: `以个人日干 ${bazi.dayGan} 对今日天干 ${today.dayGan} 推出 ${shiShen}。` },
     { id: 'hour-gate', label: '时辰门', value: current.gate, weight: 0.45, tier: 'interpretive', explanation: `当前 ${current.zhi}时落 ${current.gate}，用于生成即时行动建议。` },

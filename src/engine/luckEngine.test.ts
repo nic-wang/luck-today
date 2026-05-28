@@ -1,37 +1,10 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { members } from '../data/members';
 import { relations } from '../data/relations';
 import { computeDailyLuck, computeRelationToday } from './luckEngine';
 
-beforeAll(() => {
-  globalThis.Solar = {
-    fromYmdHms: () => ({
-      getLunar: () => ({
-        getEightChar: () => ({
-          getYearGan: () => '丙',
-          getYearZhi: () => '午',
-          getMonthGan: () => '癸',
-          getMonthZhi: () => '巳',
-          getDayGan: () => '乙',
-          getDayZhi: () => '亥',
-          getTimeGan: () => '癸',
-          getTimeZhi: () => '未'
-        }),
-        getYearGan: () => '丙',
-        getYearZhi: () => '午',
-        getMonthGan: () => '癸',
-        getMonthZhi: () => '巳',
-        getDayGan: () => '己',
-        getDayZhi: () => '亥',
-        getTimeGan: () => '甲',
-        getTimeZhi: () => '子',
-        getYearInGanZhi: () => '丙午',
-        getMonthInChinese: () => '四',
-        getDayInChinese: () => '初九'
-      })
-    })
-  };
-});
+// 引擎用 tyme4ts 真实算（不再 mock lunar.js Solar）
+// migration.test.ts 已经验证 tyme4ts 与 lunar.js 输出 100% 一致
 
 describe('luck engine v2', () => {
   it('returns stable explainable daily luck', () => {
@@ -53,24 +26,3 @@ describe('luck engine v2', () => {
     expect(result.factors.length).toBe(2);
   });
 });
-
-declare global {
-  var Solar: {
-    fromYmdHms: (...args: number[]) => {
-      getLunar: () => {
-        getEightChar: () => Record<string, () => string>;
-        getYearGan: () => string;
-        getYearZhi: () => string;
-        getMonthGan: () => string;
-        getMonthZhi: () => string;
-        getDayGan: () => string;
-        getDayZhi: () => string;
-        getTimeGan: () => string;
-        getTimeZhi: () => string;
-        getYearInGanZhi: () => string;
-        getMonthInChinese: () => string;
-        getDayInChinese: () => string;
-      };
-    };
-  };
-}

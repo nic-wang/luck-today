@@ -1,0 +1,78 @@
+{
+  "bazi": {
+    "niu-1989-05-15-14": {
+      "yearGan": "己",
+      "yearZhi": "巳",
+      "monthGan": "己",
+      "monthZhi": "巳",
+      "dayGan": "乙",
+      "dayZhi": "亥",
+      "timeGan": "癸",
+      "timeZhi": "未"
+    },
+    "xixi-1999-06-03-22": {
+      "yearGan": "己",
+      "yearZhi": "卯",
+      "monthGan": "己",
+      "monthZhi": "巳",
+      "dayGan": "丙",
+      "dayZhi": "戌",
+      "timeGan": "己",
+      "timeZhi": "亥"
+    }
+  },
+  "today": {
+    "2026-05-28-12:00:00": {
+      "yearGan": "丙",
+      "yearZhi": "午",
+      "monthGan": "癸",
+      "monthZhi": "巳",
+      "dayGan": "壬",
+      "dayZhi": "寅",
+      "timeGan": "丙",
+      "timeZhi": "午",
+      "yearInGanZhi": "丙午",
+      "monthInChinese": "四",
+      "dayInChinese": "十二"
+    },
+    "2026-05-28-00:00:00": {
+      "yearGan": "丙",
+      "yearZhi": "午",
+      "monthGan": "癸",
+      "monthZhi": "巳",
+      "dayGan": "壬",
+      "dayZhi": "寅",
+      "timeGan": "庚",
+      "timeZhi": "子",
+      "yearInGanZhi": "丙午",
+      "monthInChinese": "四",
+      "dayInChinese": "十二"
+    },
+    "2026-05-06-12:00:00": {
+      "yearGan": "丙",
+      "yearZhi": "午",
+      "monthGan": "癸",
+      "monthZhi": "巳",
+      "dayGan": "庚",
+      "dayZhi": "辰",
+      "timeGan": "壬",
+      "timeZhi": "午",
+      "yearInGanZhi": "丙午",
+      "monthInChinese": "三",
+      "dayInChinese": "二十"
+    },
+    "1989-05-15-14:00:00": {
+      "yearGan": "己",
+      "yearZhi": "巳",
+      "monthGan": "己",
+      "monthZhi": "巳",
+      "dayGan": "乙",
+      "dayZhi": "亥",
+      "timeGan": "癸",
+      "timeZhi": "未",
+      "yearInGanZhi": "己巳",
+      "monthInChinese": "四",
+      "dayInChinese": "十一"
+    }
+  }
+}
