@@ -1933,3 +1933,241 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 @media (max-width: 720px) {
   .theme-block .polarity-grid { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   Tab 4 · 解释页 v3.1 · 今日得分矩阵 + chip 联动
+   ============================================================ */
+
+.explain-page {
+  display: grid;
+  gap: 18px;
+}
+
+.score-matrix {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+}
+.matrix-head h2 {
+  margin: 0 0 4px;
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.matrix-body {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) auto;
+  gap: 24px;
+  align-items: center;
+}
+.matrix-body .hex-radar {
+  width: min(420px, 100%);
+  justify-self: center;
+}
+.matrix-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+}
+.matrix-legend span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+.matrix-legend i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.dim-chip-row {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+.dim-chip {
+  display: grid;
+  gap: 2px;
+  padding: 10px 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  cursor: pointer;
+  text-align: center;
+  font: inherit;
+  color: var(--ink);
+  transition: transform .15s ease, border-color .15s ease;
+}
+.dim-chip:hover { transform: translateY(-1px); }
+.dim-chip.is-active {
+  border-color: var(--ink);
+  background: var(--surface-soft);
+}
+.dim-chip .chip-label {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 700;
+}
+.dim-chip strong { font-size: 16px; font-weight: 800; }
+.dim-chip strong em {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 13px;
+}
+.dim-chip.polarity-high {
+  border-color: var(--positive-line);
+  background: var(--positive-bg);
+}
+.dim-chip.polarity-high strong { color: var(--positive); }
+.dim-chip.polarity-low {
+  border-color: var(--negative-line);
+  background: var(--negative-bg);
+}
+.dim-chip.polarity-low strong { color: var(--negative); }
+.dim-chip.is-active.polarity-high { box-shadow: 0 6px 18px var(--positive-bg); }
+.dim-chip.is-active.polarity-low { box-shadow: 0 6px 18px var(--negative-bg); }
+
+/* === 维度详情 联动展开 === */
+.dim-detail-panel {
+  padding: 18px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+.dim-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.dim-detail {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  border-left: 4px solid var(--line);
+}
+.dim-detail.polarity-high { border-left-color: var(--positive-line); }
+.dim-detail.polarity-low  { border-left-color: var(--negative-line); }
+.dim-detail header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.dim-detail .dim-name { font-size: 13px; font-weight: 800; color: var(--muted); }
+.dim-detail .dim-score { font-size: 30px; font-weight: 800; color: var(--ink); }
+.dim-detail .polarity {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+}
+.dim-detail.polarity-high .polarity { color: var(--positive); border-color: var(--positive-line); background: var(--positive-bg); }
+.dim-detail.polarity-low  .polarity { color: var(--negative); border-color: var(--negative-line); background: var(--negative-bg); }
+.dim-detail .conclusion { margin: 0; font-size: 14px; }
+.dim-detail .muted { margin: 0; font-size: 12px; line-height: 1.6; color: var(--muted); }
+.dim-evidence {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+.dim-evidence li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 10px;
+  background: var(--surface-soft);
+  border-radius: 8px;
+  font-size: 12px;
+}
+.dim-evidence b { font-weight: 700; }
+.dim-evidence em {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* === 因子追溯 折叠 === */
+.trace-fold {
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: var(--surface-soft);
+  border: 1px dashed var(--line);
+}
+.trace-fold > summary {
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  font-weight: 800;
+  list-style: none;
+}
+.trace-fold > summary::-webkit-details-marker { display: none; }
+.trace-fold > summary > span { font-size: 14px; }
+.trace-fold > summary > b { color: var(--muted); font-weight: 700; font-size: 12px; }
+.trace-fold[open] > summary { margin-bottom: 14px; }
+.trace-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.trace-col {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.trace-col header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--line);
+}
+.trace-name { font-size: 14px; font-weight: 800; }
+.trace-score {
+  font-style: normal;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--accent, var(--ink));
+}
+
+/* === 算法版本 footer === */
+.algo-footer {
+  display: grid;
+  gap: 4px;
+  padding: 18px 22px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  text-align: center;
+}
+.algo-footer strong {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 720px) {
+  .matrix-body { grid-template-columns: 1fr; }
+  .matrix-legend { flex-direction: row; justify-content: center; }
+  .dim-chip-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .dim-detail-grid { grid-template-columns: 1fr; }
+  .trace-grid { grid-template-columns: 1fr; }
+}
