@@ -856,37 +856,37 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 }
 
 @media (max-width: 820px) {
+  /* mobile / PWA · 用 flex 而不是 grid · 避免 grid template areas 跟 fixed
+     的边角 case · 同时隐藏 date-chip 减少干扰（信息在内容区已有） */
   .top {
-    grid-template-columns: 1fr auto;
-    grid-template-areas:
-      "brand date"
-      "brand date";
-    position: static;
-    gap: 8px;
+    display: flex !important;
+    flex-direction: row;
     align-items: center;
+    justify-content: flex-start;
+    grid-template-columns: none !important;
+    grid-template-areas: none !important;
+    position: static !important;
+    gap: 8px;
   }
-  .brand-block { grid-area: brand; }
-  .date-chip {
-    grid-area: date;
-    display: grid;
-    justify-self: end;
-    text-align: right;
-    font-size: 12px;
-    padding: 8px 10px;
-  }
-  /* segmented 固定到底部 · 像 iOS 原生 tab bar */
+  .top .brand-block { flex: 1 1 auto; min-width: 0; }
+  .top .date-chip { display: none !important; }
+  /* segmented 固定到底部 · iOS 原生 tab bar 风格 · 强制脱离 .top 流 */
+  .top .segmented,
   .segmented {
-    position: fixed;
+    position: fixed !important;
     left: 12px;
     right: 12px;
     bottom: calc(10px + env(safe-area-inset-bottom));
+    top: auto !important;
     z-index: 80;
     width: auto;
     padding: 5px;
     border-radius: 18px;
-    box-shadow: 0 18px 44px rgba(15, 18, 28, 0.18);
+    box-shadow: 0 18px 44px rgba(15, 18, 28, 0.22);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    backdrop-filter: blur(22px);
+    background: var(--frosted-top);
   }
   .segmented button { flex: 1 0 auto; min-width: 56px; padding: 9px 10px; min-height: 40px; border-radius: 13px; }
   .segmented .theme-toggle { flex: 0 0 auto; }

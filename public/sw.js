@@ -9,23 +9,38 @@
  * 升级流程：改了代码想强制用户拿新版 → 改下面的 VERSION，push 后客户端会自动清旧缓存
  */
 
-const VERSION = 'v3-20260530-pwa-layout-fix';
+const VERSION = 'v3-20260531-pwa-flex-top';
 const CACHE_NAME = `luck-today-${VERSION}`;
 
 self.addEventListener('install', event => {
   event.waitUntil(self.skipWaiting());
 });
 
-// activate: 清理旧版本缓存
+// client 也可以主动告诉新 SW "立即接管"
+self.addEventListener('message', event => {
+  if (event.data?.type === 'skip-waiting') {
+    self.skipWaiting();
+  }
+});
+
+// activate: 清理旧版本缓存 + 通知所有 client 强制 reload
+// （iOS PWA 缓存极顽固 · 即便 network-first 也常吃旧 HTML）
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(
         keys
           .filter(k => k.startsWith('luck-today-') && k !== CACHE_NAME)
           .map(k => caches.delete(k))
-      )
-    ).then(() => self.clients.claim())
+      );
+      await self.clients.claim();
+      // 通知所有打开的 client 强制 reload · 拿新 HTML
+      const clients = await self.clients.matchAll({ type: 'window' });
+      for (const client of clients) {
+        client.postMessage({ type: 'sw-updated', version: VERSION });
+      }
+    })()
   );
 });
 
