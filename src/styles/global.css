@@ -1599,64 +1599,102 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 }
 .ritual-face {
   display: grid;
-  align-content: space-between;
+  align-content: start;
   justify-items: center;
-  padding: 14px;
+  padding: 10px 10px 14px;
   border-radius: 16px;
-  background: linear-gradient(160deg, #204c2b, #356f43);
+  background: linear-gradient(160deg, #1f2a3a, #2d3a4d);
   color: #fff;
-  box-shadow: inset 0 0 0 4px rgba(255,255,255,0.1);
-  min-height: 200px;
+  box-shadow: inset 0 0 0 3px rgba(255,255,255,0.08);
   text-align: center;
+  gap: 8px;
 }
-.ritual-face.reversed { background: linear-gradient(160deg, #3c235f, #6f3f8d); }
+.ritual-face .ritual-img {
+  width: 100%;
+  max-width: 160px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.32);
+}
+.ritual-face.reversed .ritual-img {
+  transform: rotate(180deg);
+}
+.ritual-face .ritual-face-meta {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  width: 100%;
+}
 .ritual-face .card-no {
-  justify-self: start;
   font-weight: 900;
-  color: rgba(255,255,255,0.65);
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.18em;
 }
-.ritual-face .card-emoji { font-size: 44px; }
-.ritual-face strong { font-size: 20px; }
+.ritual-face strong { font-size: 16px; line-height: 1.2; }
 .ritual-face em {
   font-style: normal;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   font-size: 10px;
-  color: rgba(255,255,255,0.62);
+  color: rgba(255,255,255,0.6);
 }
 .ritual-face b {
-  padding: 3px 10px;
+  padding: 2px 9px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.28);
-  font-size: 11px;
+  border: 1px solid rgba(255,255,255,0.26);
+  font-size: 10px;
   font-weight: 700;
 }
 .ritual-text {
   display: grid;
   align-content: start;
-  gap: 8px;
+  gap: 10px;
 }
-.ritual-text .conclusion {
-  margin: 0;
+.ritual-section {
+  display: grid;
+  gap: 4px;
   padding: 10px 12px;
-  border-left: 3px solid #c9a26b;
+  border-radius: 10px;
   background: var(--surface-soft);
-  border-radius: 8px;
-  font-size: 14px;
+  border: 1px solid var(--line);
 }
-.ritual-text p { margin: 0; line-height: 1.65; font-size: 13px; }
-.ritual-text .keywords { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-.ritual-text .keywords span {
+.ritual-section-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.ritual-section p {
+  margin: 0;
+  line-height: 1.65;
+  font-size: 13px;
+  color: var(--ink);
+}
+.ritual-keywords {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+}
+.ritual-keywords .keywords { display: flex; flex-wrap: wrap; gap: 6px; }
+.ritual-keywords .keywords span {
   padding: 3px 9px;
   font-size: 11px;
   border-radius: 999px;
-  background: var(--surface-soft);
+  background: var(--surface);
   border: 1px solid var(--line);
   color: var(--ink-soft);
 }
 .ritual-ask {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
 }
 .ritual-ask input {
   border: 1px solid var(--line);
@@ -1667,7 +1705,7 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   font: inherit;
 }
 .ritual-ask button {
-  padding: 0 18px;
+  padding: 0 16px;
   border: 0;
   border-radius: 12px;
   background: var(--ink);
@@ -1675,15 +1713,14 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   font-weight: 800;
   cursor: pointer;
 }
-.ritual-answer {
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--accent) 10%, var(--surface-soft));
+.ritual-ask button.ritual-reset {
+  background: transparent;
+  color: var(--ink-soft);
   border: 1px solid var(--line);
 }
-.ritual-answer span { display: block; margin-bottom: 4px; color: var(--muted); font-size: 12px; }
-.ritual-answer strong { font-size: 15px; }
-.ritual-answer p { margin: 6px 0 0; font-size: 12px; color: var(--ink-soft); }
+.ritual-note {
+  margin: 0;
+}
 
 /* === 段 4 · 深读折叠 === */
 .deep-read {
@@ -1732,7 +1769,8 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   .hero-row { grid-template-columns: 1fr; }
   .day-grid { grid-template-columns: 1fr; }
   .ritual-body { grid-template-columns: 1fr; }
-  .ritual-face { justify-self: center; width: min(180px, 60%); }
+  .ritual-face { justify-self: center; width: min(220px, 80%); }
+  .ritual-face .ritual-img { max-width: 180px; }
   .ritual-ask { grid-template-columns: 1fr; }
   .now-card { padding: 18px; }
 }

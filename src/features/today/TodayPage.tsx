@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { useState } from 'react';
+import { TAROT_RWS_78, type TarotCardData } from '../../data/tarot-rws-78';
 import type { QimenChart } from '../../engine/adapters/taobi';
 import {
   avoidNarrative,
@@ -8,13 +9,7 @@ import {
   themeNarrative,
   type NarrativeRow
 } from '../../engine/narrativize';
-import type { AlgorithmFactor, DailyLuckResult, LuckTier, MemberProfile } from '../../types';
-
-const TIER_LABEL: Record<LuckTier, string> = {
-  deterministic: '命定',
-  interpretive: '推演',
-  ritual: '心相'
-};
+import type { DailyLuckResult, MemberProfile } from '../../types';
 
 const SUIT_LABEL: Record<NonNullable<DailyLuckResult['tarot']['suit']>, string> = {
   wands: '权杖 · 火',
@@ -299,59 +294,119 @@ function NarrativeBlock({
 
 function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberProfile }) {
   const [question, setQuestion] = useState('');
-  const [drawn, setDrawn] = useState(false);
+  // 当前展示的牌：默认 = engine 算的命定牌；用户抽牌后 = 互动结果
+  const [drawnCard, setDrawnCard] = useState<{ card: TarotCardData; reversed: boolean } | null>(null);
+  const [drawnFromQuestion, setDrawnFromQuestion] = useState('');
+
+  // 实际渲染用的牌
+  const tarot = drawnCard
+    ? {
+        ...drawnCard.card,
+        reversed: drawnCard.reversed,
+        meaning: drawnCard.reversed ? drawnCard.card.reversed : drawnCard.card.upright,
+        question: drawnFromQuestion || `今天我应该如何处理"${drawnCard.card.name}"的命题？`
+      }
+    : item.tarot;
+
+  function reroll() {
+    // 真随机：用 Date.now() + question 文本 + member 做种子
+    const seedText = `${Date.now()}-${question}-${member.id}`;
+    const seed = hashString(seedText);
+    const idx = seed % TAROT_RWS_78.length;
+    const card = TAROT_RWS_78[idx];
+    const reversed = ((seed >> 8) & 1) === 1;
+    setDrawnCard({ card, reversed });
+    setDrawnFromQuestion(question);
+  }
+
+  function reset() {
+    setDrawnCard(null);
+    setDrawnFromQuestion('');
+    setQuestion('');
+  }
+
   return (
     <article className="ritual-card">
       <header>
         <h4>今日心相</h4>
         <span className="tier-chip" data-tier="ritual">心相 · 不算分</span>
       </header>
+
       <div className="ritual-body">
-        <div className={`ritual-face ${item.tarot.reversed ? 'reversed' : ''}`}>
-          <span className="card-no">{String(item.tarot.id).padStart(2, '0')}</span>
-          <span className="card-emoji">{item.tarot.emoji}</span>
-          <strong>{item.tarot.name}</strong>
-          <em>{item.tarot.en}</em>
-          <b>{item.tarot.reversed ? '逆位' : '正位'} · {tarotArcanaLabel(item.tarot.arcana, item.tarot.suit)}</b>
+        <div className={`ritual-face ${tarot.reversed ? 'reversed' : ''}`}>
+          <img
+            className="ritual-img"
+            src={`${import.meta.env.BASE_URL}assets/tarot/${String(tarot.id).padStart(3, '0')}.jpg`}
+            alt={tarot.name}
+            loading="lazy"
+          />
+          <div className="ritual-face-meta">
+            <span className="card-no">{String(tarot.id).padStart(2, '0')}</span>
+            <strong>{tarot.name}</strong>
+            <em>{tarot.en}</em>
+            <b>{tarot.reversed ? '逆位' : '正位'} · {tarotArcanaLabel(tarot.arcana, tarot.suit)}</b>
+          </div>
         </div>
+
+        {/* 5 段框架：原版含义 / 今日解读 / 行动建议 / 白话 / 关键词 */}
         <div className="ritual-text">
-          <p className="conclusion"><strong>{item.tarot.core}</strong></p>
-          <p><b>解读：</b>{item.tarot.meaning}</p>
-          <p><b>动作：</b>{item.tarot.action}</p>
-          <div className="keywords">
-            {item.tarot.keywords.map(k => <span key={k}>{k}</span>)}
+          <RitualSection label="原版含义" body={tarot.core} />
+          <RitualSection label="今日解读" body={tarot.meaning} />
+          <RitualSection label="行动建议" body={tarot.action} />
+          <RitualSection label="白话" body={tarot.advice} />
+          <div className="ritual-keywords">
+            <span className="ritual-section-label">关键词</span>
+            <div className="keywords">
+              {tarot.keywords.map(k => <span key={k}>{k}</span>)}
+            </div>
           </div>
         </div>
       </div>
+
       <div className="ritual-ask">
         <input
           value={question}
           onChange={e => setQuestion(e.target.value)}
           placeholder={`想问点什么？比如${member.id === 'niu' ? '今天适合签合同吗' : '今天适合表白吗'}`}
         />
-        <button type="button" onClick={() => setDrawn(true)}>抽牌</button>
+        <button type="button" onClick={reroll}>{drawnCard ? '再抽一张' : '抽牌'}</button>
+        {drawnCard && (
+          <button type="button" className="ritual-reset" onClick={reset}>回默认</button>
+        )}
       </div>
-      {drawn && (
-        <div className="ritual-answer">
-          <span>{question || item.tarot.question}</span>
-          <strong>{item.tarot.action}</strong>
-          <p>这张牌不替你做决定 · 只给一个看待今天的角度。</p>
-        </div>
+
+      {drawnCard && (
+        <p className="ritual-note muted small">
+          自由抽 · 牌随每次问题/时刻变化 · 命定牌（默认）由日干 + 出生信息决定
+        </p>
       )}
     </article>
   );
 }
 
+function RitualSection({ label, body }: { label: string; body: string }) {
+  return (
+    <div className="ritual-section">
+      <span className="ritual-section-label">{label}</span>
+      <p>{body}</p>
+    </div>
+  );
+}
+
+// 字符串 → 32 bit 哈希（不引依赖）
+function hashString(s: string): number {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return h;
+}
+
 function DeepReadBody({ item }: { item: DailyLuckResult }) {
   return (
     <div className="deep-body">
-      <section>
-        <h5>算法因子</h5>
-        <p className="muted small">每条带 trustLevel + 权重点（5 点 = 满权重）</p>
-        <div className="factor-list">
-          {item.factors.map(f => <FactorBlock key={f.id} factor={f} />)}
-        </div>
-      </section>
+      <p className="muted small">算法因子追溯请到「解释」Tab · 这里只看推算盘面</p>
 
       {item.qimen && (
         <section>
@@ -365,21 +420,6 @@ function DeepReadBody({ item }: { item: DailyLuckResult }) {
         <h5>当前 / 下一吉时</h5>
         <HourBar item={item} />
       </section>
-    </div>
-  );
-}
-
-function FactorBlock({ factor }: { factor: AlgorithmFactor }) {
-  const dots = Math.max(1, Math.min(5, Math.round(factor.weight * 5)));
-  return (
-    <div className={`factor factor-${factor.tier}`}>
-      <div className="factor-head">
-        <span className="factor-tier-chip" data-tier={factor.tier}>{TIER_LABEL[factor.tier]}</span>
-        <span className="label">{factor.label}</span>
-        <span className="factor-weight" title={`权重 ${factor.weight.toFixed(2)}`}>{'·'.repeat(dots)}</span>
-      </div>
-      <strong>{factor.value}</strong>
-      <p>{factor.explanation}</p>
     </div>
   );
 }
