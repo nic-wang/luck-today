@@ -190,15 +190,30 @@ function relationWx(keyword: string): Wuxing | null {
   return (['水', '火', '木', '金', '土'] as Wuxing[]).find(wx => keyword.includes(wx)) ?? null;
 }
 
+// target 对 dayWx 的关系标签（决定"补法"的语气）
+function targetRoleFor(dayWx: Wuxing, targetWx: Wuxing): '印' | '比' | '食' | '财' | '官' {
+  if (targetWx === dayWx) return '比';
+  if (WX_SHENG[targetWx] === dayWx) return '印';   // 生我
+  if (WX_SHENG[dayWx] === targetWx) return '食';   // 我泄
+  if (WX_KE[dayWx] === targetWx) return '财';      // 我克
+  if (WX_KE[targetWx] === dayWx) return '官';      // 克我
+  return '比';
+}
+
 function genDailyExtensions(member: MemberProfile, theme: { goodFor: string[]; watchOut: string[] }, targetWx: Wuxing, avoidWx: Wuxing, todayWx: Wuxing) {
-  const bodyByWx: Record<Wuxing, string> = {
+  const dayWx = member.mainWuxing;
+  const role = targetRoleFor(dayWx, targetWx);
+
+  // 身体节奏：以日主为主，但加上 "今日 wx 是否同气" 的差别
+  const bodyByDay: Record<Wuxing, string> = {
     木: '多伸展，少久坐，眼睛和肩颈要放松',
     火: '少上火，少暴晒，重要回复先停 10 分钟',
     土: '稳脾胃，别贪凉，处理杂事先分堆',
     金: '注意呼吸，少讲重话，空间保持清爽',
     水: '补水早睡，减少信息噪声，晚上别硬撑'
   };
-  const speechByWx: Record<Wuxing, string> = {
+  // 表达风格：日主决定底色
+  const speechByDay: Record<Wuxing, string> = {
     木: '先提方向，再讲理由，避免揽过多活',
     火: '表达可以亮，但不要把话说满',
     土: '慢一点说，结论要落在执行上',
@@ -206,32 +221,76 @@ function genDailyExtensions(member: MemberProfile, theme: { goodFor: string[]; w
     水: '多问少答，先听完再给建议'
   };
 
+  // role 决定 target 怎么用（而不是 target 本身决定）
+  const targetUsage: Record<typeof role, string> = {
+    印: `${targetWx}是滋养源 · 多接受、多吸收、不强行输出`,
+    比: `${targetWx}与日主同气 · 借同类人事推进，但小心过载`,
+    食: `${targetWx}是出口 · 把内劲转成作品/表达，别憋着`,
+    财: `${targetWx}是可调用资源 · 主动管理而非被动等`,
+    官: `${targetWx}是边界 · 接受规则与制约，反而出活`
+  };
+  const helperByRole: Record<typeof role, string> = {
+    印: '愿意教你/给你信息/让你慢下来的人',
+    比: '同频战友，别过度依赖',
+    食: '懂你输出方向、能给舞台的人',
+    财: '愿意把资源摆台面、能落价格的人',
+    官: '有规则感、能给你硬边界的人'
+  };
+  const homeByRole: Record<typeof role, string> = {
+    印: `让${targetWx}气物件围你（书/水景/暖灯），少刺激源`,
+    比: `${targetWx}气适度即可，桌面减法优先`,
+    食: `留出"创作位"，${targetWx}气放在出口方向`,
+    财: `${targetWx}气物件靠近钱位（财位/抽屉），定期清账`,
+    官: `${targetWx}气放在工作位前方，提醒规则与边界`
+  };
+
+  // 今日 wx 与日主的关系决定"今天体感"
+  const todayRole = targetRoleFor(dayWx, todayWx);
+  const todaySensation: Record<typeof todayRole, string> = {
+    印: `今日${todayWx}气生${dayWx}日主，是接收日，别硬输出`,
+    比: `今日${todayWx}与日主同气，能量同频但易过载，别把日程排满`,
+    食: `今日${todayWx}泄日主，适合表达和创作，避免低强度内耗`,
+    财: `今日${todayWx}是日主可控的对象，主动出击但留一个复核点`,
+    官: `今日${todayWx}对日主有压制，先稳后动，今天不抢节奏`
+  };
+
+  // 颜色 / 饮水也按 role 区分
+  const drinkText = role === '印' && targetWx === '水'
+    ? '今天补水是"接收"动作，上午先完成 800ml'
+    : todayRole === '官'
+      ? '常温水分段喝，别靠咖啡硬顶（今天压力气足）'
+      : '常温水分段喝，节奏稳住';
+
   return {
-    yi: [...theme.goodFor, `补${targetWx}：穿搭/饮食/方位同向强化`].slice(0, 5),
-    ji: [...theme.watchOut, `避${avoidWx}：今天不要在${WX_PACK[avoidWx].direction}久坐`, todayWx === '火' ? '避免情绪化回复' : '避免临时改大计划'].slice(0, 5),
+    yi: [...theme.goodFor, `${targetUsage[role]}`].slice(0, 5),
+    ji: [
+      ...theme.watchOut,
+      `避${avoidWx}：今天不要在${WX_PACK[avoidWx].direction}久坐`,
+      todayRole === '官' ? '避免硬碰硬，今天不抢节奏' : todayWx === '火' ? '避免情绪化回复' : '避免临时改大计划'
+    ].slice(0, 5),
     avoidList: [
       `少碰${WX_PACK[avoidWx].colors.join('/')}`,
       `避开${WX_PACK[avoidWx].direction}位久坐`,
-      todayWx === member.mainWuxing ? '能量同频但容易过载，别把日程排满' : `今日${todayWx}气主导，先顺势不要硬顶`,
+      todaySensation[todayRole],
       '所有重要决定留一个复核点'
     ],
     wellness: [
-      { label: '身体', value: bodyByWx[member.mainWuxing] },
-      { label: '饮水', value: targetWx === '水' ? '今天补水是主动作，上午先完成 800ml' : '常温水分段喝，别靠咖啡硬顶' },
-      { label: '睡眠', value: '23:30 前收尾，睡前不做争论型沟通' }
+      { label: '身体', value: bodyByDay[dayWx] },
+      { label: '饮水', value: drinkText },
+      { label: '睡眠', value: dayWx === '火' ? '23:00 前收尾，睡前不做争论型沟通' : dayWx === '木' ? '23:30 前关屏，避免临睡前刷长视频' : '23:30 前收尾，睡前不做争论型沟通' }
     ],
     helper: [
       { label: '贵人方向', value: WX_PACK[targetWx].direction },
-      { label: '贵人气质', value: targetWx === '水' ? '冷静、信息全、能降温的人' : targetWx === '木' ? '愿意一起生发新想法的人' : '能给结构和边界的人' }
+      { label: '贵人气质', value: helperByRole[role] }
     ],
     home: [
-      { label: '宜', value: targetWx === '水' ? '整理饮水区/卧室，降低噪声' : `让${targetWx}气物件上位，桌面做减法` },
+      { label: '宜', value: homeByRole[role] },
       { label: '忌', value: `不要强化${avoidWx}气：${WX_PACK[avoidWx].colors.join('/')}少用` }
     ],
     speech: [
-      { label: '对外', value: speechByWx[member.mainWuxing] },
-      { label: '亲密关系', value: '先说感受，再说请求，不翻旧账' },
-      { label: '工作', value: '结论前置，证据放后面，避免临时承诺' }
+      { label: '对外', value: speechByDay[dayWx] },
+      { label: '亲密关系', value: dayWx === '火' ? '语气先放慢半拍，再说请求' : dayWx === '木' ? '先说感受，再说请求，不翻旧账' : '先讲事实，再讲想法，最后说期待' },
+      { label: '工作', value: dayWx === '金' ? '标准前置，例外另开会' : dayWx === '土' ? '步骤先定，再展开内容' : '结论前置，证据放后面，避免临时承诺' }
     ]
   };
 }
@@ -247,18 +306,74 @@ function radarFrom(dimensions: DailyLuckResult['dimensions'], score: number, tar
   ];
 }
 
+// === 多维度评分（每个维度独立打分 · 让两人差异充分体现）===
+// 1. yongScore: 用神被滋养程度（0-100）— 60% 权重
+// 2. dayMainScore: 日主自身气场强弱（0-100）— 30% 权重
+// 3. hourScore: 当前时辰对个体的影响（0-100）— 10% 权重
+function computeYongScore(todayWx: Wuxing, yong: Wuxing | undefined): number {
+  if (!yong) return 55;
+  if (todayWx === yong) return 88;                          // 同气 = 用神被加强
+  if (WX_SHENG[todayWx] === yong) return 78;                // 今日生用神
+  if (WX_SHENG[yong] === todayWx) return 50;                // 用神泄给今日（轻微泄）
+  if (WX_KE[yong] === todayWx) return 42;                   // 用神被消耗
+  if (WX_KE[todayWx] === yong) return 32;                   // 今日克用神（最差）
+  return 55;
+}
+function computeDayMainScore(todayWx: Wuxing, dayWx: Wuxing): number {
+  if (todayWx === dayWx) return 75;                         // 比劫 = 同气
+  if (WX_SHENG[todayWx] === dayWx) return 80;               // 今日生我 = 印星
+  if (WX_SHENG[dayWx] === todayWx) return 55;               // 我泄今日 = 食伤
+  if (WX_KE[dayWx] === todayWx) return 65;                  // 我克今日 = 财
+  if (WX_KE[todayWx] === dayWx) return 45;                  // 今日克我 = 官杀压身
+  return 55;
+}
+function computeHourScore(personalTag: string): number {
+  switch (personalTag) {
+    case '同气': return 75;
+    case '生身': return 82;
+    case '胜出': return 70;
+    case '泄身': return 50;
+    case '克身': return 38;
+    default: return 60;
+  }
+}
+
+// 季节调候：月支 → 偏好 wx（与原 seasonYong 互补）
+function seasonAdjust(monthZhi: string, dayWx: Wuxing): number {
+  // 夏天（巳午未）+ 火日主 → 燥热 · 减分
+  // 冬天（亥子丑）+ 水日主 → 寒湿 · 减分
+  // 平衡 = +0
+  if ('巳午未'.includes(monthZhi) && dayWx === '火') return -8;
+  if ('亥子丑'.includes(monthZhi) && dayWx === '水') return -8;
+  if ('寅卯辰'.includes(monthZhi) && dayWx === '木') return -4;
+  if ('申酉戌'.includes(monthZhi) && dayWx === '金') return -4;
+  return 0;
+}
+
 export function computeDailyLuck(member: MemberProfile, date = new Date()): DailyLuckResult {
   const bazi = baziFor(member);
   const today = todayFor(date);
   const todayWx = TIANGAN_WUXING[today.dayGan];
   const shiShen = getShiShen(bazi.dayGan, today.dayGan);
   const theme = SHISHEN_THEME[shiShen] ?? SHISHEN_THEME.正官;
-  const base = todayWx === bazi.yong ? 80 : WX_SHENG[todayWx] === bazi.yong ? 70 : WX_KE[todayWx] === bazi.yong ? 35 : 55;
+
+  // 多维度 base · 让两人即使 yong 相同也能差异化
+  const yongScore = computeYongScore(todayWx, bazi.yong);
+  const dayMainScore = computeDayMainScore(todayWx, bazi.dayWx);
+  // hourScore 在算 windows 后才能拿，先 fallback 为中性
+  const baseRaw = yongScore * 0.55 + dayMainScore * 0.30 + 60 * 0.15 + seasonAdjust(today.monthZhi, bazi.dayWx);
+  const base = Math.max(28, Math.min(92, baseRaw));
+
+  // 个体化 weights：除了 shishen，再叠加 mainWuxing 因素
   const weights = {
-    事业: shiShen === '正官' || shiShen === '七杀' ? 1.18 : 1,
-    财运: shiShen === '正财' || shiShen === '偏财' ? 1.22 : 0.96,
-    社交: shiShen === '食神' || shiShen === '伤官' || shiShen === '比肩' ? 1.14 : 0.95,
-    健康: shiShen === '正印' || shiShen === '食神' ? 1.16 : 0.92
+    事业: (shiShen === '正官' || shiShen === '七杀' ? 1.20 : 1.0)
+        + (bazi.dayWx === '金' ? 0.05 : 0),  // 金主刚毅 · 事业偏强
+    财运: (shiShen === '正财' || shiShen === '偏财' ? 1.22 : 0.96)
+        + (bazi.dayWx === '土' ? 0.06 : bazi.dayWx === '金' ? 0.04 : 0),
+    社交: (shiShen === '食神' || shiShen === '伤官' || shiShen === '比肩' ? 1.16 : 0.94)
+        + (bazi.dayWx === '木' ? 0.06 : bazi.dayWx === '火' ? 0.04 : 0),
+    健康: (shiShen === '正印' || shiShen === '食神' ? 1.18 : 0.92)
+        + (bazi.dayWx === '水' ? 0.04 : 0)
   };
   const dimensions = Object.fromEntries(
     Object.entries(weights).map(([key, weight]) => [
@@ -267,7 +382,10 @@ export function computeDailyLuck(member: MemberProfile, date = new Date()): Dail
     ])
   ) as DailyLuckResult['dimensions'];
   const score = Math.round(Object.values(dimensions).reduce((sum, value) => sum + value, 0) / 4);
-  const targetWx = todayWx === bazi.yong || WX_KE[todayWx] !== bazi.yong ? bazi.yong : member.mainWuxing;
+
+  // targetWx：双轨 · 看 yong 受冲就用 mainWuxing 替补
+  const yongStressed = WX_KE[todayWx] === bazi.yong;
+  const targetWx = yongStressed ? bazi.dayWx : (bazi.yong ?? bazi.dayWx);
   const avoidWx = WX_KE[targetWx];
   const pack = WX_PACK[targetWx];
   const windows = windowsFor(today.dayGan, member.mainWuxing);
@@ -283,8 +401,10 @@ export function computeDailyLuck(member: MemberProfile, date = new Date()): Dail
   const factors: AlgorithmFactor[] = [
     { id: 'calendar', label: '流日干支', value: today.ganzhi, weight: 1, tier: 'deterministic', explanation: `tyme4ts 计算今日为 ${today.ganzhi} 日，${todayWx}气主导。` },
     { id: 'personal-yong', label: '个人用神', value: bazi.yong, weight: 0.9, tier: 'deterministic', explanation: `${member.name} 当前按 ${member.wuxing} / 用神${bazi.yong} 做调候主轴。` },
-    { id: 'shishen', label: '十神主题', value: shiShen, weight: 0.75, tier: 'interpretive', explanation: `以个人日干 ${bazi.dayGan} 对今日天干 ${today.dayGan} 推出 ${shiShen}。` },
-    { id: 'hour-gate', label: '时辰门', value: current.gate, weight: 0.45, tier: 'interpretive', explanation: `当前 ${current.zhi}时落 ${current.gate}，用于生成即时行动建议。` },
+    { id: 'yong-score', label: '用神得分', value: yongScore, weight: 0.85, tier: 'deterministic', explanation: `今日 ${todayWx} 对用神 ${bazi.yong} 的滋养度 ${yongScore}/100。` },
+    { id: 'daymain-score', label: '日主气场', value: dayMainScore, weight: 0.75, tier: 'deterministic', explanation: `今日 ${todayWx} 对日主 ${bazi.dayWx} 的影响 ${dayMainScore}/100。` },
+    { id: 'shishen', label: '十神主题', value: shiShen, weight: 0.7, tier: 'interpretive', explanation: `以个人日干 ${bazi.dayGan} 对今日天干 ${today.dayGan} 推出 ${shiShen}。` },
+    { id: 'hour-gate', label: '时辰门', value: current.gate, weight: 0.45, tier: 'interpretive', explanation: `当前 ${current.zhi}时落 ${current.gate}，对你为 ${current.personalTag}。` },
     ...(qmFactor ? [qmFactor] : []),
     { id: 'ritual-card', label: '塔罗仪式牌', value: tarot.name, weight: 0.15, tier: 'ritual', explanation: '塔罗只做每日仪式感，不进入核心分数。' }
   ];
