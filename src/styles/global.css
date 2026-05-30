@@ -1592,11 +1592,13 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   gap: 10px;
 }
 .ritual-card header h4 { margin: 0; font-size: 15px; font-weight: 700; }
-.ritual-body {
+
+/* 顶部 · 等高两栏 · figure 不超高 · side 撑满 */
+.ritual-top {
   display: grid;
   grid-template-columns: minmax(120px, 140px) minmax(0, 1fr);
   gap: 14px;
-  align-items: start;
+  align-items: stretch;
 }
 .ritual-face {
   display: grid;
@@ -1604,6 +1606,7 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   margin: 0;
   padding: 0;
   text-align: left;
+  align-content: start;
 }
 .ritual-face .ritual-face-meta {
   display: grid;
@@ -1637,6 +1640,7 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 }
 .ritual-face .ritual-img {
   width: 100%;
+  max-height: 220px;
   aspect-ratio: 2 / 3;
   object-fit: cover;
   object-position: center;
@@ -1648,9 +1652,86 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 .ritual-face.reversed .ritual-img {
   transform: rotate(180deg);
 }
-.ritual-text {
+
+/* 顶部右栏 · 默认 / 抽牌后 共用容器 */
+.ritual-side {
   display: grid;
   align-content: start;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+}
+.ritual-side .ritual-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+.ritual-side p { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--ink); }
+
+/* 默认状态 · 命定牌摘要 */
+.ritual-default .default-line {
+  font-size: 11px;
+  color: var(--muted);
+}
+.ritual-default .default-quote {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink);
+  font-weight: 600;
+  padding: 6px 10px;
+  border-left: 2px solid var(--accent);
+  background: var(--surface);
+  border-radius: 4px;
+}
+.ritual-default .default-kw { display: flex; flex-wrap: wrap; gap: 5px; }
+.ritual-default .default-kw span {
+  padding: 2px 8px;
+  font-size: 10px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+}
+.ritual-default .default-action { color: var(--ink); font-size: 12px; }
+.ritual-default .default-action b { color: var(--accent); font-weight: 700; }
+
+/* 抽牌后 · 问题 × 牌融合 */
+.ritual-fusion {
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface-soft));
+  border-color: color-mix(in srgb, var(--accent) 22%, var(--line));
+  border-left: 3px solid var(--accent);
+}
+.ritual-fusion .fusion-q { color: var(--ink); font-weight: 600; }
+.ritual-fusion .fusion-angle { color: var(--ink-soft); font-size: 11.5px; }
+.ritual-fusion .fusion-angle b { color: var(--accent); font-weight: 700; }
+.ritual-fusion .fusion-insight { color: var(--ink); }
+.ritual-fusion .fusion-landing { color: var(--ink); }
+.ritual-fusion .fusion-landing b { color: var(--accent); font-weight: 700; }
+
+/* 置底 strip · 5 段释义折叠 */
+.ritual-strip {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+.ritual-strip > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  cursor: pointer;
+  list-style: none;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.ritual-strip > summary::-webkit-details-marker { display: none; }
+.ritual-strip > summary > span { font-weight: 700; color: var(--ink); }
+.ritual-strip > summary > b { font-weight: 500; font-size: 11px; color: var(--muted); }
+.ritual-strip[open] > summary { margin-bottom: 8px; }
+
+.ritual-text {
+  display: grid;
   gap: 0;
 }
 .ritual-row {
@@ -1683,24 +1764,6 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   border: 1px solid var(--line);
   color: var(--ink-soft);
 }
-/* 抽牌后 · 问题 × 牌 高亮段 */
-.ritual-fusion {
-  display: grid;
-  gap: 6px;
-  padding: 12px 14px;
-  margin-bottom: 10px;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--accent) 6%, var(--surface-soft));
-  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));
-  border-left: 3px solid var(--accent);
-}
-.ritual-fusion p { margin: 0; font-size: 12.5px; line-height: 1.6; }
-.ritual-fusion .fusion-q { color: var(--ink); font-weight: 600; }
-.ritual-fusion .fusion-angle { color: var(--ink-soft); font-size: 11.5px; }
-.ritual-fusion .fusion-angle b { color: var(--accent); font-weight: 700; }
-.ritual-fusion .fusion-insight { color: var(--ink); }
-.ritual-fusion .fusion-landing { color: var(--ink); }
-.ritual-fusion .fusion-landing b { color: var(--accent); font-weight: 700; }
 
 .ritual-ask {
   display: grid;
@@ -1787,7 +1850,7 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 @media (max-width: 720px) {
   .hero-row { grid-template-columns: 1fr; }
   .day-grid { grid-template-columns: 1fr; }
-  .ritual-body { grid-template-columns: 110px minmax(0, 1fr); gap: 10px; }
+  .ritual-top { grid-template-columns: 110px minmax(0, 1fr); gap: 10px; }
   .ritual-row { grid-template-columns: 56px minmax(0, 1fr); gap: 10px; }
   .ritual-ask { grid-template-columns: 1fr auto auto; }
   .now-card { padding: 18px; }

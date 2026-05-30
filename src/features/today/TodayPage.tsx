@@ -344,7 +344,8 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
         <span className="tier-chip" data-tier="ritual">心相 · 不算分</span>
       </header>
 
-      <div className="ritual-body">
+      {/* 顶部：左 figure + 右 摘要/融合（保持等高 · 不留白） */}
+      <div className="ritual-top">
         <figure className={`ritual-face ${tarot.reversed ? 'reversed' : ''}`}>
           <figcaption className="ritual-face-meta">
             <span className="card-no">No. {String(tarot.id).padStart(2, '0')}</span>
@@ -360,19 +361,34 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
           />
         </figure>
 
-        <div className="ritual-text">
-          {/* 抽牌后 · 问题 × 牌的关联（高亮） */}
-          {fusion && (
-            <section className="ritual-fusion">
-              <span className="ritual-section-label">针对你的问题</span>
-              <p className="fusion-q">「{fusion.question}」</p>
-              <p className="fusion-angle">这张牌切的角度 · <b>{fusion.angle}</b></p>
-              <p className="fusion-insight">{fusion.insight}</p>
-              <p className="fusion-landing"><b>落到你的问题：</b>{fusion.landing}</p>
-            </section>
-          )}
+        {fusion ? (
+          <section className="ritual-side ritual-fusion">
+            <span className="ritual-section-label">针对你的问题</span>
+            <p className="fusion-q">「{fusion.question}」</p>
+            <p className="fusion-angle">这张牌切的角度 · <b>{fusion.angle}</b></p>
+            <p className="fusion-insight">{fusion.insight}</p>
+            <p className="fusion-landing"><b>落到你的问题：</b>{fusion.landing}</p>
+          </section>
+        ) : (
+          <section className="ritual-side ritual-default">
+            <span className="ritual-section-label">本日命定</span>
+            <p className="default-line">由日干 + 出生信息决定 · 也可以输入问题再抽一张</p>
+            <p className="default-quote">"{tarot.core}"</p>
+            <div className="default-kw">
+              {tarot.keywords.map(k => <span key={k}>{k}</span>)}
+            </div>
+            <p className="default-action"><b>动作：</b>{tarot.action}</p>
+          </section>
+        )}
+      </div>
 
-          {/* 5 段卡牌本身的释义 */}
+      {/* 置底 strip：5 段释义（折叠 · 默认收起 · 想看再展开） */}
+      <details className="ritual-strip">
+        <summary>
+          <span>展开 5 段释义</span>
+          <b>原版含义 / 今日解读 / 行动建议 / 白话 / 关键词</b>
+        </summary>
+        <div className="ritual-text">
           <RitualSection label="原版含义" body={tarot.core} />
           <RitualSection label="今日解读" body={tarot.meaning} />
           <RitualSection label="行动建议" body={tarot.action} />
@@ -384,7 +400,7 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
             </div>
           </div>
         </div>
-      </div>
+      </details>
 
       <div className="ritual-ask">
         <input
