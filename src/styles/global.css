@@ -2171,3 +2171,175 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   .dim-detail-grid { grid-template-columns: 1fr; }
   .trace-grid { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   Tab 3 · 大运页 v3.1 · 主题叙事 + 主位/次位结构
+   ============================================================ */
+
+.fortune-page {
+  display: grid;
+  gap: 16px;
+}
+.fortune-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 18px 22px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+.fortune-hero h2 { margin: 4px 0 6px; font-size: clamp(22px, 3vw, 30px); font-weight: 800; }
+.fortune-empty { padding: 28px; text-align: center; }
+
+/* === 主位 fortune-main 大卡 === */
+.fortune-main {
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  border-left: 5px solid var(--accent);
+  box-shadow: var(--shadow);
+}
+.fortune-main.polarity-do    { border-left-color: var(--positive); }
+.fortune-main.polarity-dont  { border-left-color: var(--negative); }
+.fortune-main.polarity-neutral { border-left-color: var(--accent); }
+
+.fortune-main > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.fortune-main h4 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.fortune-main .main-head-right {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.fortune-main .now-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  background: var(--ink);
+  color: var(--bg);
+  letter-spacing: 0.06em;
+}
+.help-chip {
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  border: 1px solid currentColor;
+  letter-spacing: 0.04em;
+}
+.help-chip.help-support { color: var(--positive); background: var(--positive-bg); border-color: var(--positive-line); }
+.help-chip.help-press,
+.help-chip.help-drain   { color: var(--negative); background: var(--negative-bg); border-color: var(--negative-line); }
+.help-chip.help-neutral { color: var(--ink-soft); background: var(--surface-soft); border-color: var(--line); }
+
+.fortune-main .theme-word {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+}
+.fortune-main .narrative {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--ink);
+}
+
+/* === 次位 fortune-rail · 时间轴 chip 集合 === */
+.fortune-rail {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  margin-top: -4px;
+}
+.year-rail { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+.month-rail { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+
+.fortune-chip {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding: 10px 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: transform .15s ease, border-color .15s ease;
+}
+.fortune-chip:hover { transform: translateY(-1px); border-color: var(--accent); }
+.fortune-chip strong { font-size: 16px; font-weight: 800; }
+.fortune-chip em {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.fortune-chip em.chip-extra { font-size: 10px; color: var(--muted); }
+.fortune-chip .chip-no {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.fortune-chip.is-current {
+  border-color: var(--ink);
+}
+.fortune-chip.is-picked {
+  outline: 2px solid var(--ink);
+  outline-offset: -1px;
+  background: var(--surface-soft);
+}
+.fortune-chip.polarity-do {
+  background: var(--positive-bg);
+  border-color: var(--positive-line);
+}
+.fortune-chip.polarity-do strong { color: var(--positive); }
+.fortune-chip.polarity-dont {
+  background: var(--negative-bg);
+  border-color: var(--negative-line);
+}
+.fortune-chip.polarity-dont strong { color: var(--negative); }
+.fortune-chip .now-tag {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  background: var(--ink);
+  color: var(--bg);
+}
+.month-chip {
+  text-align: center;
+  padding: 10px 8px;
+}
+.month-chip strong { font-size: 14px; }
+.month-chip em { font-size: 10px; }
+
+@media (max-width: 720px) {
+  .fortune-hero { grid-template-columns: 1fr; }
+  .fortune-rail { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+  .month-rail { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
