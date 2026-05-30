@@ -857,12 +857,42 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 
 @media (max-width: 820px) {
   .top {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "brand date"
+      "brand date";
     position: static;
+    gap: 8px;
+    align-items: center;
   }
-  .date-chip { display: grid; }
-  .segmented { width: 100%; }
-  .segmented button { flex: 1; }
+  .brand-block { grid-area: brand; }
+  .date-chip {
+    grid-area: date;
+    display: grid;
+    justify-self: end;
+    text-align: right;
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+  /* segmented 固定到底部 · 像 iOS 原生 tab bar */
+  .segmented {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    z-index: 80;
+    width: auto;
+    padding: 5px;
+    border-radius: 18px;
+    box-shadow: 0 18px 44px rgba(15, 18, 28, 0.18);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .segmented button { flex: 1 0 auto; min-width: 56px; padding: 9px 10px; min-height: 40px; border-radius: 13px; }
+  .segmented .theme-toggle { flex: 0 0 auto; }
+  /* 给底部 fixed segmented 留出 footer 空间 · 防内容被遮 */
+  .shell { padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
+
   .hero-brief, .brief-grid, .workbench, .daily-detail-grid, .matrix-section, .explain-grid, .version-card, .hex-card, .two-column-list, .hex-detail-grid {
     grid-template-columns: 1fr;
   }
@@ -887,17 +917,6 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 @media (min-width: 640px) and (max-width: 920px) {
   .shell {
     padding-inline: 16px;
-  }
-  .top {
-    grid-template-columns: 1fr auto;
-    align-items: center;
-  }
-  .date-chip {
-    grid-column: 1 / -1;
-  }
-  .segmented {
-    width: auto;
-    justify-self: end;
   }
   .brief-grid,
   .daily-detail-grid,
@@ -944,20 +963,9 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
     letter-spacing: 0.12em;
   }
   .date-chip {
-    padding: 10px 12px;
-    font-size: 13px;
+    padding: 8px 10px;
+    font-size: 12px;
     border-radius: 12px;
-  }
-  .segmented {
-    position: fixed;
-    left: 12px;
-    right: 12px;
-    bottom: calc(10px + env(safe-area-inset-bottom));
-    z-index: 80;
-    width: auto;
-    padding: 5px;
-    border-radius: 18px;
-    box-shadow: 0 18px 44px rgba(23, 33, 27, 0.22);
   }
   .segmented button {
     min-height: 44px;

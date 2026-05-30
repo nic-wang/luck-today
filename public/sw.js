@@ -9,7 +9,7 @@
  * 升级流程：改了代码想强制用户拿新版 → 改下面的 VERSION，push 后客户端会自动清旧缓存
  */
 
-const VERSION = 'v3-20260530-pin-mobile-fix';
+const VERSION = 'v3-20260530-pwa-layout-fix';
 const CACHE_NAME = `luck-today-${VERSION}`;
 
 self.addEventListener('install', event => {
