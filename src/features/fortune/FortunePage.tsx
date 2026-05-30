@@ -19,10 +19,13 @@ import type { MemberProfile } from '../../types';
 interface Props {
   members: MemberProfile[];
   primaryIds: string[];
+  focusId: string;
+  onFocusChange: (id: string) => void;
 }
 
-export function FortunePage({ members, primaryIds }: Props) {
-  const [whoId, setWhoId] = useState(primaryIds[0]);
+export function FortunePage({ members, primaryIds, focusId, onFocusChange }: Props) {
+  const whoId = focusId;
+  const setWhoId = onFocusChange;
   const member = members.find(m => m.id === whoId)!;
   const decades = useMemo(() => computeDecadeFortunes(member, 8), [member]);
   const currentDecadeIdx = useMemo(() => {

@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 
-const PIN_HASH = 'e264ef79df035c5fdca411bada273c40139ff966fdaee2c7b092cc54a9da673e';
+// PIN → memberId 映射
+// 0515 → 牛牛 · 0603 → 嘻嘻
+const PIN_TABLE: Array<{ hash: string; memberId: 'niu' | 'xixi' }> = [
+  { hash: 'a48df623ba742149cd350aae8bc74381d244f79e58adc7bb795345d9194da9ff', memberId: 'niu' },
+  { hash: 'e264ef79df035c5fdca411bada273c40139ff966fdaee2c7b092cc54a9da673e', memberId: 'xixi' }
+];
 const KEY_PWA = 'LUCK_GATE_PASS_PWA';
 const KEY_SESSION = 'LUCK_GATE_PASS_SESSION';
 
@@ -101,11 +106,23 @@ function sha256Fallback(ascii: string) {
 
 export function usePinGate() {
   const [passed, setPassed] = useState(false);
+  const [defaultMemberId, setDefaultMemberId] = useState<'niu' | 'xixi'>('niu');
   const [error, setError] = useState(false);
 
   useEffect(() => {
     try {
-      setPassed(storage().getItem(storageKey()) === PIN_HASH);
+      const stored = storage().getItem(storageKey());
+      if (!stored) return;
+      // 兼容旧格式：纯 hash · 默认嘻嘻（旧 PIN 0603 = 嘻嘻）
+      const match = PIN_TABLE.find(p => p.hash === stored);
+      if (match) {
+        setPassed(true);
+        setDefaultMemberId(match.memberId);
+      } else {
+        // 旧版本通过的 client · 直接放行 · 默认嘻嘻
+        setPassed(true);
+        setDefaultMemberId('xixi');
+      }
     } catch {
       setPassed(false);
     }
@@ -113,9 +130,11 @@ export function usePinGate() {
 
   async function submit(pin: string) {
     const hash = await sha256(pin);
-    if (hash === PIN_HASH) {
-      storage().setItem(storageKey(), PIN_HASH);
+    const match = PIN_TABLE.find(p => p.hash === hash);
+    if (match) {
+      storage().setItem(storageKey(), hash);
       setPassed(true);
+      setDefaultMemberId(match.memberId);
       setError(false);
       return true;
     }
@@ -123,7 +142,7 @@ export function usePinGate() {
     return false;
   }
 
-  return { passed, error, submit, isPwa: isPwa() };
+  return { passed, defaultMemberId, error, submit, isPwa: isPwa() };
 }
 
 declare global {

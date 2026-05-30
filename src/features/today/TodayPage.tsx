@@ -25,135 +25,63 @@ interface Props {
   members: MemberProfile[];
 }
 
-export function TodayPage({ daily, focusId, onFocusChange, members }: Props) {
+export function TodayPage({ daily, focusId, members }: Props) {
+  // 单人视角 · 只渲染 focusId 那一份
+  const item = daily.find(d => d.memberId === focusId) ?? daily[0];
+  const member = members.find(m => m.id === item.memberId)!;
   return (
     <main className="page today-page">
-      <HeroCompact daily={daily} focusId={focusId} onFocusChange={onFocusChange} members={members} />
-      <DualSegments daily={daily} focusId={focusId} members={members} />
+      <SoloHero item={item} member={member} />
+      <SoloStack item={item} member={member} />
     </main>
   );
 }
 
-function HeroCompact({
-  daily,
-  focusId,
-  onFocusChange,
-  members
-}: {
-  daily: DailyLuckResult[];
-  focusId: string;
-  onFocusChange: (id: string) => void;
-  members: MemberProfile[];
-}) {
-  const ordered = [...daily].sort((a, b) => {
-    if (a.memberId === focusId) return -1;
-    if (b.memberId === focusId) return 1;
-    return 0;
-  });
+function SoloHero({ item, member }: { item: DailyLuckResult; member: MemberProfile }) {
   return (
     <section className="hero-compact">
-      <div className="hero-row">
-        {ordered.map(item => {
-          const m = members.find(x => x.id === item.memberId)!;
-          const active = item.memberId === focusId;
-          return (
-            <button
-              key={item.memberId}
-              type="button"
-              className={`hero-person${active ? ' is-active' : ''}`}
-              onClick={() => onFocusChange(item.memberId)}
-              style={{ '--accent': m.color } as CSSProperties}
-            >
-              <img src={`${import.meta.env.BASE_URL}${m.photo}`} alt="" />
-              <div>
-                <p className="name">{m.name}</p>
-                <p className="meta">{m.wuxing} · 用神{m.yong}</p>
-              </div>
-              <strong>{item.score}</strong>
-              <em>{item.label}</em>
-            </button>
-          );
-        })}
+      <div className="hero-row hero-solo">
+        <div
+          className="hero-person is-active"
+          style={{ '--accent': member.color } as CSSProperties}
+        >
+          <img src={`${import.meta.env.BASE_URL}${member.photo}`} alt="" />
+          <div>
+            <p className="name">{member.name}</p>
+            <p className="meta">{member.wuxing} · 用神{member.yong}</p>
+          </div>
+          <strong>{item.score}</strong>
+          <em>{item.label}</em>
+        </div>
       </div>
     </section>
   );
 }
 
-function DualSegments({
-  daily,
-  focusId,
-  members
-}: {
-  daily: DailyLuckResult[];
-  focusId: string;
-  members: MemberProfile[];
-}) {
-  // 把 focused 那个人排在第一位（视觉主位）
-  const ordered = [...daily].sort((a, b) => {
-    if (a.memberId === focusId) return -1;
-    if (b.memberId === focusId) return 1;
-    return 0;
-  });
-
+function SoloStack({ item, member }: { item: DailyLuckResult; member: MemberProfile }) {
   return (
     <div className="day-stack">
 
       {/* 段 1 · 现在 */}
       <SectionHeader title="现在" caption="当前时辰能做 / 不能做" />
-      <PersonRow>
-        {ordered.map(item => {
-          const m = members.find(x => x.id === item.memberId)!;
-          return (
-            <PersonColumn key={item.memberId} member={m} isFocused={item.memberId === focusId}>
-              <NowCard item={item} />
-            </PersonColumn>
-          );
-        })}
-      </PersonRow>
+      <NowCard item={item} />
 
       {/* 段 2 · 今日 */}
       <SectionHeader title="今日" caption="主题 · 外援 · 避雷" />
-      <PersonRow>
-        {ordered.map(item => {
-          const m = members.find(x => x.id === item.memberId)!;
-          return (
-            <PersonColumn key={item.memberId} member={m} isFocused={item.memberId === focusId}>
-              <TodayBlocks item={item} member={m} />
-            </PersonColumn>
-          );
-        })}
-      </PersonRow>
+      <TodayBlocks item={item} member={member} />
 
       {/* 段 3 · 仪式 */}
       <SectionHeader title="心相" caption="心态参考 · 不算分" />
-      <PersonRow>
-        {ordered.map(item => {
-          const m = members.find(x => x.id === item.memberId)!;
-          return (
-            <PersonColumn key={item.memberId} member={m} isFocused={item.memberId === focusId}>
-              <RitualCard item={item} member={m} />
-            </PersonColumn>
-          );
-        })}
-      </PersonRow>
+      <RitualCard item={item} member={member} />
 
       {/* 段 4 · 深读（折叠） */}
       <SectionHeader title="深读" caption="想看推算过程？" />
       <details className="deep-read">
         <summary>
-          <span>展开算法因子 + 奇门盘 + 时辰盘</span>
-          <b>双人对照</b>
+          <span>展开奇门盘 + 时辰盘</span>
+          <b>{member.name} 单人视角</b>
         </summary>
-        <PersonRow>
-          {ordered.map(item => {
-            const m = members.find(x => x.id === item.memberId)!;
-            return (
-              <PersonColumn key={item.memberId} member={m} isFocused={item.memberId === focusId}>
-                <DeepReadBody item={item} />
-              </PersonColumn>
-            );
-          })}
-        </PersonRow>
+        <DeepReadBody item={item} />
       </details>
     </div>
   );
@@ -165,34 +93,6 @@ function SectionHeader({ title, caption }: { title: string; caption: string }) {
       <h3>{title}</h3>
       <p>{caption}</p>
     </header>
-  );
-}
-
-function PersonRow({ children }: { children: React.ReactNode }) {
-  return <div className="person-row">{children}</div>;
-}
-
-function PersonColumn({
-  member,
-  isFocused,
-  children
-}: {
-  member: MemberProfile;
-  isFocused: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <div
-      className={`person-col${isFocused ? ' is-focused' : ' is-dimmed'}`}
-      style={{ '--accent': member.color, '--tint': member.colorBg } as CSSProperties}
-    >
-      <header className="col-head">
-        <img src={`${import.meta.env.BASE_URL}${member.photo}`} alt="" />
-        <span>{member.name}</span>
-        {!isFocused && <em>对照</em>}
-      </header>
-      <div className="col-body">{children}</div>
-    </div>
   );
 }
 

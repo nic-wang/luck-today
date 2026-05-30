@@ -7,10 +7,17 @@ const TIER_LABEL: Record<LuckTier, string> = {
   ritual: '心相'
 };
 
-const COLORS = ['#5c8a6b', '#c9a26b'];
+const FOCUS_COLOR = '#5c8a6b';
 
-export function ExplainPanel({ version, daily }: { version: AlgorithmVersion; daily: DailyLuckResult[] }) {
-  const primary = daily[0];
+interface Props {
+  version: AlgorithmVersion;
+  daily: DailyLuckResult[];
+  focusId: string;
+}
+
+export function ExplainPanel({ version, daily, focusId }: Props) {
+  // 单人视角 · 只看 focusId 一份
+  const item = daily.find(d => d.memberId === focusId) ?? daily[0];
   const [activeDim, setActiveDim] = useState<string | null>(null);
 
   return (
@@ -20,21 +27,14 @@ export function ExplainPanel({ version, daily }: { version: AlgorithmVersion; da
       <section className="score-matrix">
         <header className="matrix-head">
           <h2>今日得分矩阵</h2>
-          <p className="muted small">由 6 个维度按权重合成 · 点 chip 看详情</p>
+          <p className="muted small">{item.memberId === 'niu' ? '牛牛' : '嘻嘻'} · 由 6 个维度按权重合成 · 点 chip 看详情</p>
         </header>
         <div className="matrix-body">
-          <HexRadar daily={daily} />
-          <div className="matrix-legend">
-            {daily.map((item, idx) => (
-              <span key={item.memberId}><i style={{ background: COLORS[idx] }} />{item.memberId === 'niu' ? '牛牛' : '嘻嘻'}</span>
-            ))}
-          </div>
+          <HexRadar item={item} />
         </div>
         <div className="dim-chip-row" role="tablist" aria-label="维度详情">
-          {primary.radar.map(axis => {
-            const niuVal = daily[0].radar.find(a => a.id === axis.id)?.value ?? 0;
-            const xixiVal = daily[1]?.radar.find(a => a.id === axis.id)?.value;
-            const polarity = polarityFor(niuVal);
+          {item.radar.map(axis => {
+            const polarity = polarityFor(axis.value);
             return (
               <button
                 key={axis.id}
@@ -45,10 +45,7 @@ export function ExplainPanel({ version, daily }: { version: AlgorithmVersion; da
                 onClick={() => setActiveDim(activeDim === axis.id ? null : axis.id)}
               >
                 <span className="chip-label">{axis.label}</span>
-                <strong>
-                  {niuVal}
-                  {xixiVal !== undefined && <em> / {xixiVal}</em>}
-                </strong>
+                <strong>{axis.value}</strong>
               </button>
             );
           })}
@@ -58,7 +55,7 @@ export function ExplainPanel({ version, daily }: { version: AlgorithmVersion; da
       {/* 模块 2 · 维度详情（chip 联动 · 默认折叠） */}
       {activeDim && (
         <section className="dim-detail-panel" aria-live="polite">
-          <DimensionDetail axisId={activeDim} daily={daily} />
+          <DimensionDetail axisId={activeDim} item={item} />
         </section>
       )}
 
@@ -66,20 +63,18 @@ export function ExplainPanel({ version, daily }: { version: AlgorithmVersion; da
       <details className="trace-fold">
         <summary>
           <span>想看推算过程？</span>
-          <b>{primary.factors.length} 个因子 · 双人对照</b>
+          <b>{item.factors.length} 个因子 · {item.memberId === 'niu' ? '牛牛' : '嘻嘻'} 视角</b>
         </summary>
-        <div className="trace-grid">
-          {daily.map(item => (
-            <div className="trace-col" key={item.memberId}>
-              <header>
-                <span className="trace-name">{item.memberId === 'niu' ? '牛牛' : '嘻嘻'}</span>
-                <em className="trace-score">{item.score}</em>
-              </header>
-              <div className="factor-list">
-                {item.factors.map(factor => <FactorBlock key={factor.id} factor={factor} />)}
-              </div>
+        <div className="trace-grid trace-grid-solo">
+          <div className="trace-col">
+            <header>
+              <span className="trace-name">{item.memberId === 'niu' ? '牛牛' : '嘻嘻'}</span>
+              <em className="trace-score">{item.score}</em>
+            </header>
+            <div className="factor-list">
+              {item.factors.map(factor => <FactorBlock key={factor.id} factor={factor} />)}
             </div>
-          ))}
+          </div>
         </div>
       </details>
 
@@ -99,34 +94,30 @@ function polarityFor(score: number): 'high' | 'mid' | 'low' {
   return 'low';
 }
 
-function DimensionDetail({ axisId, daily }: { axisId: string; daily: DailyLuckResult[] }) {
+function DimensionDetail({ axisId, item }: { axisId: string; item: DailyLuckResult }) {
+  const axis = item.radar.find(a => a.id === axisId);
+  if (!axis) return null;
+  const polarity = polarityFor(axis.value);
   return (
     <div className="dim-detail-grid">
-      {daily.map(item => {
-        const axis = item.radar.find(a => a.id === axisId);
-        if (!axis) return null;
-        const polarity = polarityFor(axis.value);
-        return (
-          <article key={item.memberId} className={`dim-detail polarity-${polarity}`}>
-            <header>
-              <span className="dim-name">{item.memberId === 'niu' ? '牛牛' : '嘻嘻'} · {axis.label}</span>
-              <strong className="dim-score">{axis.value}</strong>
-              <span className="polarity">{polarity === 'high' ? '强势' : polarity === 'mid' ? '中性' : '守为主'}</span>
-            </header>
-            <p className="conclusion"><strong>{axis.summary}</strong></p>
-            <p className="muted">{axis.detail}</p>
-            <ul className="dim-evidence">
-              {item.factors.slice(0, 3).map(f => (
-                <li key={f.id}>
-                  <span className="tier-chip" data-tier={f.tier}>{TIER_LABEL[f.tier]}</span>
-                  <b>{f.label}</b>
-                  <em>{f.value}</em>
-                </li>
-              ))}
-            </ul>
-          </article>
-        );
-      })}
+      <article className={`dim-detail polarity-${polarity}`}>
+        <header>
+          <span className="dim-name">{item.memberId === 'niu' ? '牛牛' : '嘻嘻'} · {axis.label}</span>
+          <strong className="dim-score">{axis.value}</strong>
+          <span className="polarity">{polarity === 'high' ? '强势' : polarity === 'mid' ? '中性' : '守为主'}</span>
+        </header>
+        <p className="conclusion"><strong>{axis.summary}</strong></p>
+        <p className="muted">{axis.detail}</p>
+        <ul className="dim-evidence">
+          {item.factors.slice(0, 3).map(f => (
+            <li key={f.id}>
+              <span className="tier-chip" data-tier={f.tier}>{TIER_LABEL[f.tier]}</span>
+              <b>{f.label}</b>
+              <em>{f.value}</em>
+            </li>
+          ))}
+        </ul>
+      </article>
     </div>
   );
 }
@@ -146,11 +137,11 @@ function FactorBlock({ factor }: { factor: AlgorithmFactor }) {
   );
 }
 
-function HexRadar({ daily }: { daily: DailyLuckResult[] }) {
+function HexRadar({ item }: { item: DailyLuckResult }) {
   const size = 360;
   const center = size / 2;
   const radius = 132;
-  const axes = daily[0].radar;
+  const axes = item.radar;
 
   function point(index: number, value = 100) {
     const angle = (-90 + index * 60) * Math.PI / 180;
@@ -178,15 +169,12 @@ function HexRadar({ daily }: { daily: DailyLuckResult[] }) {
           </g>
         );
       })}
-      {daily.map((item, index) => (
-        <polygon
-          key={item.memberId}
-          points={polygon(item.radar.map(axis => axis.value))}
-          fill={COLORS[index]}
-          stroke={COLORS[index]}
-          className="hex-fill"
-        />
-      ))}
+      <polygon
+        points={polygon(item.radar.map(axis => axis.value))}
+        fill={FOCUS_COLOR}
+        stroke={FOCUS_COLOR}
+        className="hex-fill"
+      />
       <circle cx={center} cy={center} r="4" fill="#15181c" />
     </svg>
   );

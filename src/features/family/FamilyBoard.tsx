@@ -7,6 +7,7 @@ interface Props {
   members: MemberProfile[];
   relations: RelationProfile[];
   date: Date;
+  focusId?: string;
 }
 
 interface RelationWithToday {

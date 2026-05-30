@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { members, primaryMemberIds } from '../data/members';
 import { relations } from '../data/relations';
 import { algorithmVersion, computeDailyLuck } from '../engine/luckEngine';
@@ -10,7 +10,7 @@ import { ZiweiPage } from '../features/ziwei/ZiweiPage';
 import { usePinGate } from './usePinGate';
 import { useTheme, type ThemeMode } from './useTheme';
 
-type ViewKey = 'today' | 'family' | 'fortune' | 'ziwei' | 'explain';
+type ViewKey = 'today' | 'family' | 'fortune' | 'ziwei' | 'explain' | 'hub';
 
 const views: Array<{ key: ViewKey; label: string }> = [
   { key: 'today', label: '今日' },
@@ -22,8 +22,14 @@ const views: Array<{ key: ViewKey; label: string }> = [
 
 export function App() {
   const [view, setView] = useState<ViewKey>('today');
-  const [focusId, setFocusId] = useState(primaryMemberIds[0]);
-  const { passed, error, submit, isPwa } = usePinGate();
+  const { passed, defaultMemberId, error, submit, isPwa } = usePinGate();
+  // focusId 由 PIN 决定初始值 · 整站单人视角
+  const [focusId, setFocusId] = useState<string>(defaultMemberId);
+  // PIN 通过后同步 focusId（首次设默认）
+  useEffect(() => {
+    if (passed) setFocusId(defaultMemberId);
+  }, [passed, defaultMemberId]);
+
   const { mode, cycle } = useTheme();
   const today = useMemo(() => new Date(), []);
   const daily = useMemo(() => {
@@ -33,17 +39,42 @@ export function App() {
     });
   }, [today]);
   const focus = daily.find(item => item.memberId === focusId) ?? daily[0];
+  const focusMember = members.find(m => m.id === focusId)!;
+  const otherId = primaryMemberIds.find(id => id !== focusId)!;
+  const otherMember = members.find(m => m.id === otherId)!;
+
+  function switchPerson() {
+    setFocusId(otherId);
+    if (view === 'hub') setView('today');
+  }
+  function gotoHub() {
+    setView('hub');
+  }
 
   return (
     <div className="shell">
       {!passed && <PinGate error={error} isPwa={isPwa} onSubmit={submit} />}
       <header className="top">
         <div className="brand-block">
-          <img src={`${import.meta.env.BASE_URL}assets/icons/icon-192.png`} alt="" />
+          {/* 当前聚焦人头像 · 点 → 进 hub 选人页 */}
+          <button type="button" className="brand-avatar" onClick={gotoHub} aria-label="切换视角">
+            <img src={`${import.meta.env.BASE_URL}${focusMember.photo}`} alt={focusMember.name} />
+          </button>
           <div>
-            <p className="eyebrow">Luck Today OS</p>
+            <p className="eyebrow">Luck Today OS · {focusMember.name} 视角</p>
             <h1>命理今日</h1>
           </div>
+          {/* 对方头像 · 点 = 直接切到对方 */}
+          <button
+            type="button"
+            className="switch-avatar"
+            onClick={switchPerson}
+            aria-label={`切到 ${otherMember.name}`}
+            title={`切到 ${otherMember.name}`}
+          >
+            <img src={`${import.meta.env.BASE_URL}${otherMember.photo}`} alt={otherMember.name} />
+            <span>切到{otherMember.name}</span>
+          </button>
         </div>
         <div className="date-chip">
           <span>{focus.ganzhi}</span>
@@ -64,6 +95,14 @@ export function App() {
         </nav>
       </header>
 
+      {view === 'hub' && (
+        <HubPage
+          members={members}
+          primaryIds={primaryMemberIds}
+          focusId={focusId}
+          onPick={(id) => { setFocusId(id); setView('today'); }}
+        />
+      )}
       {view === 'today' && (
         <TodayPage
           daily={daily}
@@ -72,11 +111,50 @@ export function App() {
           members={members}
         />
       )}
-      {view === 'family' && <FamilyBoard members={members} relations={relations} date={today} />}
-      {view === 'fortune' && <FortunePage members={members} primaryIds={primaryMemberIds} />}
-      {view === 'ziwei' && <ZiweiPage members={members} primaryIds={primaryMemberIds} />}
-      {view === 'explain' && <ExplainPanel version={algorithmVersion} daily={daily} />}
+      {view === 'family' && <FamilyBoard members={members} relations={relations} date={today} focusId={focusId} />}
+      {view === 'fortune' && <FortunePage members={members} primaryIds={primaryMemberIds} focusId={focusId} onFocusChange={setFocusId} />}
+      {view === 'ziwei' && <ZiweiPage members={members} primaryIds={primaryMemberIds} focusId={focusId} onFocusChange={setFocusId} />}
+      {view === 'explain' && <ExplainPanel version={algorithmVersion} daily={daily} focusId={focusId} />}
     </div>
+  );
+}
+
+function HubPage({
+  members,
+  primaryIds,
+  focusId,
+  onPick
+}: {
+  members: typeof import('../data/members').members;
+  primaryIds: string[];
+  focusId: string;
+  onPick: (id: string) => void;
+}) {
+  return (
+    <main className="page hub-page">
+      <p className="hub-eyebrow">选一个视角进入</p>
+      <h2 className="hub-title">今天看谁的命理？</h2>
+      <div className="hub-grid">
+        {primaryIds.map(id => {
+          const m = members.find(x => x.id === id)!;
+          const active = id === focusId;
+          return (
+            <button
+              key={id}
+              type="button"
+              className={`hub-card${active ? ' is-active' : ''}`}
+              onClick={() => onPick(id)}
+            >
+              <img src={`${import.meta.env.BASE_URL}${m.photo}`} alt={m.name} />
+              <strong>{m.name}</strong>
+              <span>{m.wuxing} · 用神{m.yong ?? '—'}</span>
+              {active && <em className="hub-active-tag">当前视角</em>}
+            </button>
+          );
+        })}
+      </div>
+      <p className="hub-foot muted small">单人视角 · 顶部右侧头像可一键互切 · 信息互不干扰</p>
+    </main>
   );
 }
 
