@@ -1231,140 +1231,7 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 .theme-toggle:hover { color: var(--ink); }
 .theme-toggle .icon { font-size: 14px; line-height: 1; }
 
-/* ============= Fortune Page (大运 / 流年 / 流月) ============= */
-.fortune-page { display: grid; gap: 18px; }
-.fortune-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 18px;
-  align-items: center;
-}
-.fortune-hero h2 {
-  margin: 6px 0 8px;
-  font-size: clamp(28px, 4vw, 42px);
-}
-.fortune-hero .muted { font-size: 14px; line-height: 1.7; color: var(--ink-soft); }
-
-.decade-rail {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 10px;
-}
-.decade-chip {
-  position: relative;
-  display: grid;
-  gap: 4px;
-  padding: 14px 14px 16px;
-  border-radius: 16px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--ink);
-  cursor: pointer;
-  text-align: left;
-  transition: transform .15s ease, border-color .15s ease;
-}
-.decade-chip:hover { transform: translateY(-1px); border-color: var(--accent, #5c8a6b); }
-.decade-chip .decade-no {
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  color: var(--muted);
-  font-weight: 800;
-  text-transform: uppercase;
-}
-.decade-chip strong {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-}
-.decade-chip em {
-  font-style: normal;
-  font-size: 12px;
-  color: var(--ink-soft);
-}
-.decade-chip em.years { font-size: 11px; color: var(--muted); }
-.decade-chip.is-current { border-color: #45865d; background: rgba(69, 134, 93, 0.08); }
-.decade-chip.is-picked {
-  outline: 2px solid var(--ink);
-  outline-offset: -1px;
-}
-.decade-chip .now-tag {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  padding: 2px 7px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 800;
-  background: #45865d;
-  color: #fff;
-}
-
-.year-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-  gap: 10px;
-}
-.year-cell {
-  position: relative;
-  display: grid;
-  gap: 4px;
-  padding: 12px 12px 14px;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-}
-.year-cell .age { font-size: 11px; color: var(--muted); font-weight: 700; }
-.year-cell strong { font-size: 18px; font-weight: 800; }
-.year-cell em { font-style: normal; font-size: 13px; color: var(--ink-soft); }
-.year-cell.is-current { border-color: #c59b55; background: rgba(197, 155, 85, 0.08); }
-.year-cell .now-tag {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  padding: 2px 7px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 800;
-  background: #c59b55;
-  color: #fff;
-}
-
-.month-grid {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 8px;
-}
-.month-cell {
-  position: relative;
-  display: grid;
-  gap: 4px;
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  text-align: center;
-}
-.month-cell span { font-size: 11px; color: var(--muted); font-weight: 700; }
-.month-cell strong { font-size: 16px; font-weight: 800; }
-.month-cell.is-current { border-color: #8193c9; background: rgba(129, 147, 201, 0.1); }
-.month-cell .now-tag {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  padding: 1px 5px;
-  border-radius: 999px;
-  font-size: 9px;
-  font-weight: 800;
-  background: #8193c9;
-  color: #fff;
-}
 .muted.small { font-size: 12px; color: var(--muted); margin: 10px 0 0; }
-
-@media (max-width: 639px) {
-  .fortune-hero { grid-template-columns: 1fr; }
-  .decade-rail { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
-  .month-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
 
 /* ============================================================
    Tab 1 · 今日页 v3.1 · 4 段叙事重设计
@@ -2303,6 +2170,7 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 
 /* ============================================================
    Tab 3 · 大运页 v3.1 · 主题叙事 + 主位/次位结构
+   字体口径对齐主站：h3=18/800 · h4=14-16/700 · body=13/1.6 · chip=10-11
    ============================================================ */
 
 .fortune-page {
@@ -2314,23 +2182,37 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 16px;
   align-items: center;
-  padding: 18px 22px;
+  padding: 16px 20px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 18px;
 }
-.fortune-hero h2 { margin: 4px 0 6px; font-size: clamp(22px, 3vw, 30px); font-weight: 800; }
+.fortune-hero .eyebrow {
+  margin: 0 0 4px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.fortune-hero h2 {
+  margin: 0 0 4px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.fortune-hero .muted { font-size: 12px; line-height: 1.6; color: var(--ink-soft); }
 .fortune-empty { padding: 28px; text-align: center; }
+.fortune-empty h2 { font-size: 18px; font-weight: 800; }
 
 /* === 主位 fortune-main 大卡 === */
 .fortune-main {
   display: grid;
-  gap: 12px;
-  padding: 22px;
+  gap: 10px;
+  padding: 18px 20px;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 20px;
-  border-left: 5px solid var(--accent);
+  border-radius: 18px;
+  border-left: 4px solid var(--accent);
   box-shadow: var(--shadow);
 }
 .fortune-main.polarity-do    { border-left-color: var(--positive); }
@@ -2346,10 +2228,11 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 }
 .fortune-main h4 {
   margin: 0;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 800;
   letter-spacing: 0.02em;
 }
+.fortune-main .main-head-left .muted { font-size: 11.5px; }
 .fortune-main .main-head-right {
   display: flex;
   gap: 6px;
@@ -2368,7 +2251,7 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 .help-chip {
   padding: 2px 9px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   border: 1px solid currentColor;
   letter-spacing: 0.04em;
@@ -2380,15 +2263,15 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 
 .fortune-main .theme-word {
   margin: 0;
-  font-size: 16px;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 700;
   color: var(--accent);
   letter-spacing: 0.04em;
 }
 .fortune-main .narrative {
   margin: 0;
-  font-size: 14px;
-  line-height: 1.8;
+  font-size: 13px;
+  line-height: 1.7;
   color: var(--ink);
 }
 
@@ -2406,7 +2289,7 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   position: relative;
   display: grid;
   gap: 2px;
-  padding: 10px 10px 12px;
+  padding: 9px 10px 11px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--surface);
@@ -2417,7 +2300,7 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   transition: transform .15s ease, border-color .15s ease;
 }
 .fortune-chip:hover { transform: translateY(-1px); border-color: var(--accent); }
-.fortune-chip strong { font-size: 16px; font-weight: 800; }
+.fortune-chip strong { font-size: 14px; font-weight: 700; letter-spacing: 0.02em; }
 .fortune-chip em {
   font-style: normal;
   font-size: 11px;
@@ -2428,7 +2311,7 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   font-size: 10px;
   letter-spacing: 0.12em;
   color: var(--muted);
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
 }
 .fortune-chip.is-current {
@@ -2462,9 +2345,9 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 }
 .month-chip {
   text-align: center;
-  padding: 10px 8px;
+  padding: 9px 8px;
 }
-.month-chip strong { font-size: 14px; }
+.month-chip strong { font-size: 13px; }
 .month-chip em { font-size: 10px; }
 
 @media (max-width: 720px) {
