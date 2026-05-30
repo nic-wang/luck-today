@@ -2576,3 +2576,287 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   .ziwei-center strong { font-size: 14px; }
   .vs-grid { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   Tab 2 · 家庭页 v3.1 · 颠倒主次 · 重点关系前置
+   ============================================================ */
+
+.family-page { display: grid; gap: 16px; }
+
+/* === 主位 · 牛嘻 Hero === */
+.family-hero {
+  display: grid;
+  gap: 12px;
+  padding: 22px 26px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  border-left: 5px solid var(--accent);
+  box-shadow: var(--shadow);
+}
+.family-hero.polarity-do   { border-left-color: var(--positive); }
+.family-hero.polarity-dont { border-left-color: var(--negative); }
+.hero-pair {
+  display: grid;
+  grid-template-columns: 1fr minmax(120px, 200px) 1fr;
+  align-items: center;
+  gap: 14px;
+}
+.pair-avatar {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+.pair-avatar.pair-right { justify-self: end; }
+.pair-avatar img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--accent);
+}
+.pair-avatar span {
+  font-size: 13px;
+  font-weight: 800;
+}
+.hero-link {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  text-align: center;
+}
+.hero-link .hero-keyword {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+.hero-link .hero-score {
+  font-size: 38px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--ink);
+}
+.family-hero.polarity-do  .hero-score { color: var(--positive); }
+.family-hero.polarity-dont .hero-score { color: var(--negative); }
+.hero-link .hero-meta {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.family-hero .hero-essence {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+.family-hero .hero-advice {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface-soft);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.family-hero .hero-actions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+.family-hero .hero-actions li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 13px;
+}
+.family-hero .hero-actions li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--positive);
+  font-weight: 800;
+}
+
+/* === 关系卡 grid === */
+.relation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+.relation-card {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(15, 18, 28, 0.04);
+}
+.relation-card.polarity-do   { border-left-color: var(--positive); }
+.relation-card.polarity-dont { border-left-color: var(--negative); }
+.relation-card.is-compact { box-shadow: none; padding: 14px; }
+.relation-card > header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+.rc-pair {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.rc-pair img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--line);
+}
+.rc-pair .rc-link {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 800;
+}
+.rc-head-meta {
+  display: grid;
+  gap: 2px;
+}
+.rc-head-meta strong { font-size: 14px; font-weight: 800; }
+.rc-head-meta em {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+}
+.rc-score {
+  display: grid;
+  justify-items: end;
+  gap: 0;
+}
+.rc-score strong {
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--ink);
+}
+.relation-card.polarity-do   .rc-score strong { color: var(--positive); }
+.relation-card.polarity-dont .rc-score strong { color: var(--negative); }
+.rc-score span {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.rc-conclusion {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--ink);
+}
+.rc-reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.rc-reasons span {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.rc-actions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+}
+.rc-actions li {
+  position: relative;
+  padding-left: 16px;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.rc-actions li::before {
+  content: '·';
+  position: absolute;
+  left: 4px;
+  color: var(--accent);
+  font-weight: 900;
+}
+
+/* === 矩阵折叠 === */
+.family-matrix-fold {
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+  border: 1px dashed var(--line);
+}
+.family-matrix-fold > summary {
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  font-weight: 800;
+  list-style: none;
+}
+.family-matrix-fold > summary::-webkit-details-marker { display: none; }
+.family-matrix-fold[open] > summary { margin-bottom: 14px; }
+.family-matrix-fold > summary > span { font-size: 14px; }
+.family-matrix-fold > summary > b { color: var(--muted); font-weight: 700; font-size: 12px; }
+.matrix-container {
+  display: grid;
+  gap: 14px;
+}
+
+/* === 成员档案 === */
+.member-archive {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+.member-card {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 12px;
+  padding: 12px;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 12px;
+}
+.member-card img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent);
+}
+.mc-info {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.mc-info strong { font-size: 14px; font-weight: 800; }
+.mc-info span {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.mc-info .mc-bazi {
+  font-feature-settings: 'tnum';
+  letter-spacing: 0.02em;
+}
+.mc-info .mc-yong { color: var(--accent); font-weight: 700; }
+
+@media (max-width: 720px) {
+  .hero-pair { grid-template-columns: auto 1fr auto; gap: 8px; }
+  .pair-avatar img { width: 52px; height: 52px; }
+  .hero-link .hero-score { font-size: 28px; }
+  .relation-grid { grid-template-columns: 1fr; }
+  .member-archive { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
