@@ -325,6 +325,18 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
     setQuestion('');
   }
 
+  // 抽牌后 · 问题 × 牌融合
+  const fusion = drawnCard && drawnFromQuestion
+    ? buildQuestionFusion(drawnFromQuestion, {
+        name: tarot.name,
+        reversed: tarot.reversed,
+        keywords: tarot.keywords,
+        core: tarot.core,
+        action: tarot.action,
+        advice: tarot.advice
+      })
+    : null;
+
   return (
     <article className="ritual-card">
       <header>
@@ -333,28 +345,39 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
       </header>
 
       <div className="ritual-body">
-        <div className={`ritual-face ${tarot.reversed ? 'reversed' : ''}`}>
+        <figure className={`ritual-face ${tarot.reversed ? 'reversed' : ''}`}>
+          <figcaption className="ritual-face-meta">
+            <span className="card-no">No. {String(tarot.id).padStart(2, '0')}</span>
+            <strong>{tarot.name}</strong>
+            <em>{tarot.en}</em>
+            <b>{tarot.reversed ? '逆位' : '正位'} · {tarotArcanaLabel(tarot.arcana, tarot.suit)}</b>
+          </figcaption>
           <img
             className="ritual-img"
             src={`${import.meta.env.BASE_URL}assets/tarot/${String(tarot.id).padStart(3, '0')}.jpg`}
             alt={tarot.name}
             loading="lazy"
           />
-          <div className="ritual-face-meta">
-            <span className="card-no">{String(tarot.id).padStart(2, '0')}</span>
-            <strong>{tarot.name}</strong>
-            <em>{tarot.en}</em>
-            <b>{tarot.reversed ? '逆位' : '正位'} · {tarotArcanaLabel(tarot.arcana, tarot.suit)}</b>
-          </div>
-        </div>
+        </figure>
 
-        {/* 5 段框架：原版含义 / 今日解读 / 行动建议 / 白话 / 关键词 */}
         <div className="ritual-text">
+          {/* 抽牌后 · 问题 × 牌的关联（高亮） */}
+          {fusion && (
+            <section className="ritual-fusion">
+              <span className="ritual-section-label">针对你的问题</span>
+              <p className="fusion-q">「{fusion.question}」</p>
+              <p className="fusion-angle">这张牌切的角度 · <b>{fusion.angle}</b></p>
+              <p className="fusion-insight">{fusion.insight}</p>
+              <p className="fusion-landing"><b>落到你的问题：</b>{fusion.landing}</p>
+            </section>
+          )}
+
+          {/* 5 段卡牌本身的释义 */}
           <RitualSection label="原版含义" body={tarot.core} />
           <RitualSection label="今日解读" body={tarot.meaning} />
           <RitualSection label="行动建议" body={tarot.action} />
           <RitualSection label="白话" body={tarot.advice} />
-          <div className="ritual-keywords">
+          <div className="ritual-row">
             <span className="ritual-section-label">关键词</span>
             <div className="keywords">
               {tarot.keywords.map(k => <span key={k}>{k}</span>)}
@@ -377,7 +400,7 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
 
       {drawnCard && (
         <p className="ritual-note muted small">
-          自由抽 · 牌随每次问题/时刻变化 · 命定牌（默认）由日干 + 出生信息决定
+          自由抽 · 牌随问题 / 时刻变化 · 命定牌（默认）由日干 + 出生信息决定
         </p>
       )}
     </article>
@@ -386,11 +409,58 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
 
 function RitualSection({ label, body }: { label: string; body: string }) {
   return (
-    <div className="ritual-section">
+    <div className="ritual-row">
       <span className="ritual-section-label">{label}</span>
       <p>{body}</p>
     </div>
   );
+}
+
+// === 问题 × 牌融合（不调 LLM · 模板 + 关键词分类） ===
+type Matter = 'decision' | 'relation' | 'money' | 'timing' | 'speech' | 'health' | 'general';
+
+function detectMatter(q: string): Matter {
+  if (/(适合|要不要|要|该|该不该|应不应该|去不去|做不做|签|换|辞|跳|买|卖)/.test(q)) return 'decision';
+  if (/(关系|TA|他|她|对象|分手|表白|结婚|吵架|家人|父母|朋友|同事|相处)/.test(q)) return 'relation';
+  if (/(钱|签|合同|买|卖|项目|价格|涨|跌|理财|投资|工资|奖金)/.test(q)) return 'money';
+  if (/(时机|时间|什么时候|多久|快|慢|早|晚)/.test(q)) return 'timing';
+  if (/(说|讲|聊|发|沟通|表达|话|回复|回信)/.test(q)) return 'speech';
+  if (/(身体|健康|累|睡|生病|医生|疼|休息)/.test(q)) return 'health';
+  return 'general';
+}
+
+const MATTER_PHRASE: Record<Matter, string> = {
+  decision: '决定',
+  relation: '关系',
+  money: '钱与项目',
+  timing: '时机',
+  speech: '表达',
+  health: '身体',
+  general: '当下'
+};
+
+function buildQuestionFusion(
+  question: string,
+  card: { name: string; reversed: boolean; keywords: string[]; core: string; action: string; advice: string }
+) {
+  const q = question.trim();
+  const matter = detectMatter(q);
+  const angle = card.keywords.slice(0, 2).join(' · ');
+  // landing：先用 advice 接驳问题，再补一句 action
+  const matterTopic = MATTER_PHRASE[matter];
+  const positionWord = card.reversed ? '逆位' : '正位';
+
+  const insight = `${card.name}（${positionWord}）说：${card.core}`;
+
+  // 把 advice 跟问题主题挂钩
+  const landing = `这事是${matterTopic}的题——${card.advice} 具体动作：${card.action}`;
+
+  return {
+    question: q,
+    angle: `${angle} · 在${matterTopic}面上`,
+    insight,
+    landing
+  };
 }
 
 // 字符串 → 32 bit 哈希（不引依赖）
