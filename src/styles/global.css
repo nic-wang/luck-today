@@ -1860,27 +1860,27 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   color: var(--negative);
 }
 
-/* 主题块的 必做/不做 双栏 */
-.theme-block .polarity-grid {
+/* 主题块的 必做/不做 双栏 · 通用（today / fortune 共用） */
+.polarity-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-top: 4px;
 }
-.theme-block .polarity-col {
+.polarity-col {
   padding: 10px 12px;
   border-radius: 12px;
   border: 1px solid;
 }
-.theme-block .polarity-col.polarity-do {
+.polarity-col.polarity-do {
   background: var(--positive-bg);
   border-color: var(--positive-line);
 }
-.theme-block .polarity-col.polarity-dont {
+.polarity-col.polarity-dont {
   background: var(--negative-bg);
   border-color: var(--negative-line);
 }
-.theme-block .polarity-label {
+.polarity-label {
   display: inline-block;
   margin-bottom: 6px;
   font-size: 11px;
@@ -1890,16 +1890,16 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   border-radius: 999px;
   background: var(--surface);
 }
-.theme-block .polarity-do .polarity-label { color: var(--positive); }
-.theme-block .polarity-dont .polarity-label { color: var(--negative); }
-.theme-block .polarity-col ul {
+.polarity-col.polarity-do .polarity-label { color: var(--positive); }
+.polarity-col.polarity-dont .polarity-label { color: var(--negative); }
+.polarity-col ul {
   margin: 0;
   padding-left: 18px;
   font-size: 12.5px;
   line-height: 1.65;
   color: var(--ink);
 }
-.theme-block .polarity-col li::marker {
+.polarity-col li::marker {
   color: var(--ink-soft);
 }
 
@@ -1927,7 +1927,7 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 
 /* 移动端：必做/不做双栏改纵向 */
 @media (max-width: 720px) {
-  .theme-block .polarity-grid { grid-template-columns: 1fr; }
+  .polarity-grid { grid-template-columns: 1fr; }
 }
 
 /* ============================================================
@@ -2196,13 +2196,13 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 }
 .fortune-hero h2 {
   margin: 0 0 4px;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 800;
   letter-spacing: 0.02em;
 }
 .fortune-hero .muted { font-size: 12px; line-height: 1.6; color: var(--ink-soft); }
 .fortune-empty { padding: 28px; text-align: center; }
-.fortune-empty h2 { font-size: 18px; font-weight: 800; }
+.fortune-empty h2 { font-size: 16px; font-weight: 800; }
 
 /* === 主位 fortune-main 大卡 === */
 .fortune-main {
@@ -2228,11 +2228,11 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 }
 .fortune-main h4 {
   margin: 0;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 800;
   letter-spacing: 0.02em;
 }
-.fortune-main .main-head-left .muted { font-size: 11.5px; }
+.fortune-main .main-head-left .muted { font-size: 11px; }
 .fortune-main .main-head-right {
   display: flex;
   gap: 6px;
@@ -2263,7 +2263,7 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 
 .fortune-main .theme-word {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--accent);
   letter-spacing: 0.04em;
@@ -2271,7 +2271,7 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 .fortune-main .narrative {
   margin: 0;
   font-size: 13px;
-  line-height: 1.7;
+  line-height: 1.65;
   color: var(--ink);
 }
 
