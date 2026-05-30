@@ -1640,7 +1640,7 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
 }
 .ritual-face .ritual-img {
   width: 100%;
-  max-height: 220px;
+  max-height: 190px;
   aspect-ratio: 2 / 3;
   object-fit: cover;
   object-position: center;
@@ -1653,11 +1653,12 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   transform: rotate(180deg);
 }
 
-/* 顶部右栏 · 默认 / 抽牌后 共用容器 */
+/* 顶部右栏 · 默认 / 抽牌后 共用容器 · flex 列分布到顶/中/底 */
 .ritual-side {
-  display: grid;
-  align-content: start;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
   padding: 12px 14px;
   border-radius: 12px;
   background: var(--surface-soft);
@@ -1670,6 +1671,15 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   color: var(--muted);
 }
 .ritual-side p { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--ink); }
+.ritual-side .side-head { display: grid; gap: 4px; }
+.ritual-side .side-mid { display: grid; gap: 8px; }
+.ritual-side .side-foot {
+  margin: 0;
+  padding-top: 6px;
+  font-size: 10.5px;
+  color: var(--muted);
+  border-top: 1px dashed var(--line);
+}
 
 /* 默认状态 · 命定牌摘要 */
 .ritual-default .default-line {

@@ -363,21 +363,31 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
 
         {fusion ? (
           <section className="ritual-side ritual-fusion">
-            <span className="ritual-section-label">针对你的问题</span>
-            <p className="fusion-q">「{fusion.question}」</p>
-            <p className="fusion-angle">这张牌切的角度 · <b>{fusion.angle}</b></p>
-            <p className="fusion-insight">{fusion.insight}</p>
-            <p className="fusion-landing"><b>落到你的问题：</b>{fusion.landing}</p>
+            <div className="side-head">
+              <span className="ritual-section-label">针对你的问题</span>
+              <p className="fusion-q">「{fusion.question}」</p>
+            </div>
+            <div className="side-mid">
+              <p className="fusion-angle">这张牌切的角度 · <b>{fusion.angle}</b></p>
+              <p className="fusion-insight">{fusion.insight}</p>
+              <p className="fusion-landing"><b>落到你的问题：</b>{fusion.landing}</p>
+            </div>
+            <p className="side-foot">融合 = 牌的 keywords / core / advice 嫁接到你问的话题</p>
           </section>
         ) : (
           <section className="ritual-side ritual-default">
-            <span className="ritual-section-label">本日命定</span>
-            <p className="default-line">由日干 + 出生信息决定 · 也可以输入问题再抽一张</p>
-            <p className="default-quote">"{tarot.core}"</p>
-            <div className="default-kw">
-              {tarot.keywords.map(k => <span key={k}>{k}</span>)}
+            <div className="side-head">
+              <span className="ritual-section-label">本日命定</span>
+              <p className="default-line">由日干 + 出生信息决定 · 想换张就在下方输入问题</p>
             </div>
-            <p className="default-action"><b>动作：</b>{tarot.action}</p>
+            <div className="side-mid">
+              <p className="default-quote">"{tarot.core}"</p>
+              <div className="default-kw">
+                {tarot.keywords.map(k => <span key={k}>{k}</span>)}
+              </div>
+              <p className="default-action"><b>动作：</b>{tarot.action}</p>
+            </div>
+            <p className="side-foot">心相 = 心态参考 · 不进入今日得分</p>
           </section>
         )}
       </div>
