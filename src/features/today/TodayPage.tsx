@@ -11,9 +11,9 @@ import {
 import type { AlgorithmFactor, DailyLuckResult, LuckTier, MemberProfile } from '../../types';
 
 const TIER_LABEL: Record<LuckTier, string> = {
-  deterministic: '确定层',
-  interpretive: '解释层',
-  ritual: '仪式层'
+  deterministic: '命定',
+  interpretive: '推演',
+  ritual: '心相'
 };
 
 const SUIT_LABEL: Record<NonNullable<DailyLuckResult['tarot']['suit']>, string> = {
@@ -104,7 +104,7 @@ function DualSegments({
     <div className="day-stack">
 
       {/* 段 1 · 现在 */}
-      <SectionHeader title="现在" caption="实时层 · 当前时辰能做什么" />
+      <SectionHeader title="现在" caption="当前时辰能做 / 不能做" />
       <PersonRow>
         {ordered.map(item => {
           const m = members.find(x => x.id === item.memberId)!;
@@ -117,7 +117,7 @@ function DualSegments({
       </PersonRow>
 
       {/* 段 2 · 今日 */}
-      <SectionHeader title="今日" caption="解释层 · 主题 / 外援 / 避雷" />
+      <SectionHeader title="今日" caption="主题 · 外援 · 避雷" />
       <PersonRow>
         {ordered.map(item => {
           const m = members.find(x => x.id === item.memberId)!;
@@ -130,7 +130,7 @@ function DualSegments({
       </PersonRow>
 
       {/* 段 3 · 仪式 */}
-      <SectionHeader title="仪式" caption="仪式层 · 不影响分数 · 看心态参考" />
+      <SectionHeader title="心相" caption="心态参考 · 不算分" />
       <PersonRow>
         {ordered.map(item => {
           const m = members.find(x => x.id === item.memberId)!;
@@ -143,7 +143,7 @@ function DualSegments({
       </PersonRow>
 
       {/* 段 4 · 深读（折叠） */}
-      <SectionHeader title="深读" caption="折叠 · 给想看推算过程的人" />
+      <SectionHeader title="深读" caption="想看推算过程？" />
       <details className="deep-read">
         <summary>
           <span>展开算法因子 + 奇门盘 + 时辰盘</span>
@@ -225,10 +225,9 @@ function TodayBlocks({ item, member }: { item: DailyLuckResult; member: MemberPr
   const avoid = avoidNarrative(item, member);
   return (
     <div className="today-blocks">
-      <article className="narrative-block tier-interpretive theme-block">
+      <article className="narrative-block theme-block">
         <header>
           <h4>今日主题</h4>
-          <span className="tier-chip" data-tier="interpretive">{TIER_LABEL.interpretive}</span>
         </header>
         <p className="conclusion"><strong>{theme.conclusion}</strong></p>
         <p className="tagline">{theme.tagline}</p>
@@ -249,14 +248,12 @@ function TodayBlocks({ item, member }: { item: DailyLuckResult; member: MemberPr
       </article>
       <NarrativeBlock
         title="今日外援"
-        tier="interpretive"
         polarity="do"
         conclusion={support.conclusion}
         rows={support.rows}
       />
       <NarrativeBlock
         title="今日要避"
-        tier="interpretive"
         polarity="dont"
         conclusion={avoid.conclusion}
         rows={avoid.rows}
@@ -267,24 +264,21 @@ function TodayBlocks({ item, member }: { item: DailyLuckResult; member: MemberPr
 
 function NarrativeBlock({
   title,
-  tier,
   conclusion,
   tagline,
   rows,
   polarity
 }: {
   title: string;
-  tier: LuckTier;
   conclusion: string;
   tagline?: string;
   rows: NarrativeRow[];
   polarity?: 'do' | 'dont';
 }) {
   return (
-    <article className={`narrative-block tier-${tier}${polarity ? ` polarity-${polarity}` : ''}`}>
+    <article className={`narrative-block${polarity ? ` polarity-${polarity}` : ''}`}>
       <header>
         <h4>{title}</h4>
-        <span className="tier-chip" data-tier={tier}>{TIER_LABEL[tier]}</span>
       </header>
       <p className="conclusion"><strong>{conclusion}</strong></p>
       {tagline && <p className="tagline">{tagline}</p>}
@@ -309,8 +303,8 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
   return (
     <article className="ritual-card">
       <header>
-        <h4>今日心态提示</h4>
-        <span className="tier-chip" data-tier="ritual">仪式层 · 不进核心分数</span>
+        <h4>今日心相</h4>
+        <span className="tier-chip" data-tier="ritual">心相 · 不算分</span>
       </header>
       <div className="ritual-body">
         <div className={`ritual-face ${item.tarot.reversed ? 'reversed' : ''}`}>

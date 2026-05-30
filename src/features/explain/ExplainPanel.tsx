@@ -2,9 +2,9 @@ import { useState } from 'react';
 import type { AlgorithmFactor, AlgorithmVersion, DailyLuckResult, LuckTier } from '../../types';
 
 const TIER_LABEL: Record<LuckTier, string> = {
-  deterministic: '确定层',
-  interpretive: '解释层',
-  ritual: '仪式层'
+  deterministic: '命定',
+  interpretive: '推演',
+  ritual: '心相'
 };
 
 const COLORS = ['#5c8a6b', '#c9a26b'];
