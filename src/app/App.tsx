@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { members, primaryMemberIds } from '../data/members';
 import { relations } from '../data/relations';
 import { algorithmVersion, computeDailyLuck } from '../engine/luckEngine';
@@ -108,6 +108,7 @@ function PinGate({
   onSubmit: (pin: string) => Promise<boolean>;
 }) {
   const [pin, setPin] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
 
   async function update(value: string) {
     const next = value.replace(/\D/g, '').slice(0, 4);
@@ -118,22 +119,33 @@ function PinGate({
     }
   }
 
+  function focusInput() {
+    inputRef.current?.focus();
+  }
+
   return (
-    <div className="pin-overlay">
+    <div className="pin-overlay" onClick={focusInput}>
       <div className={`pin-card ${error ? 'shake' : ''}`}>
         <div className="pin-icon">🔐</div>
         <h2>命理今日</h2>
-        <p>{isPwa ? '访问码 · 已安装版本会记住' : '请输入访问码'}</p>
-        <div className="pin-dots" aria-hidden="true">
-          {[0, 1, 2, 3].map(index => <span key={index} className={index < pin.length ? 'filled' : ''} />)}
-        </div>
-        <input
-          autoFocus
-          inputMode="numeric"
-          aria-label="访问码"
-          value={pin}
-          onChange={event => update(event.target.value)}
-        />
+        <p>{isPwa ? '访问码 · 已安装版本会记住' : '点击下方圆点 · 输入 4 位访问码'}</p>
+        {/* label 包裹：tap dots = 自动 focus input · 解决 mobile 无法输入 */}
+        <label className="pin-input-area">
+          <span className="pin-dots" aria-hidden="true">
+            {[0, 1, 2, 3].map(index => <span key={index} className={index < pin.length ? 'filled' : ''} />)}
+          </span>
+          <input
+            ref={inputRef}
+            autoFocus
+            inputMode="numeric"
+            pattern="[0-9]*"
+            type="tel"
+            autoComplete="off"
+            aria-label="访问码"
+            value={pin}
+            onChange={event => update(event.target.value)}
+          />
+        </label>
       </div>
     </div>
   );
