@@ -6,15 +6,17 @@ import { ExplainPanel } from '../features/explain/ExplainPanel';
 import { FamilyBoard } from '../features/family/FamilyBoard';
 import { FortunePage } from '../features/fortune/FortunePage';
 import { TodayPage } from '../features/today/TodayPage';
+import { ZiweiPage } from '../features/ziwei/ZiweiPage';
 import { usePinGate } from './usePinGate';
 import { useTheme, type ThemeMode } from './useTheme';
 
-type ViewKey = 'today' | 'family' | 'fortune' | 'explain';
+type ViewKey = 'today' | 'family' | 'fortune' | 'ziwei' | 'explain';
 
 const views: Array<{ key: ViewKey; label: string }> = [
   { key: 'today', label: '今日' },
   { key: 'family', label: '家庭' },
   { key: 'fortune', label: '大运' },
+  { key: 'ziwei', label: '命盘' },
   { key: 'explain', label: '解释' }
 ];
 
@@ -72,6 +74,7 @@ export function App() {
       )}
       {view === 'family' && <FamilyBoard members={members} relations={relations} date={today} />}
       {view === 'fortune' && <FortunePage members={members} primaryIds={primaryMemberIds} />}
+      {view === 'ziwei' && <ZiweiPage members={members} primaryIds={primaryMemberIds} />}
       {view === 'explain' && <ExplainPanel version={algorithmVersion} daily={daily} />}
     </div>
   );

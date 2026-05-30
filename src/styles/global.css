@@ -2343,3 +2343,236 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   .fortune-rail { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
   .month-rail { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+
+/* ============================================================
+   Tab 4.5 · 紫微命盘 v3.1
+   ============================================================ */
+
+.ziwei-page { display: grid; gap: 16px; }
+
+/* 12 宫盘面 4×4 grid · 中央 2×2 空 */
+.ziwei-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(120px, 1fr));
+  gap: 6px;
+  padding: 10px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+.palace-cell {
+  display: grid;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: transform .12s ease, border-color .12s ease;
+  overflow: hidden;
+}
+.palace-cell:hover { transform: translateY(-1px); border-color: var(--accent); }
+.palace-cell.is-focused {
+  border-color: var(--ink);
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+.palace-cell.is-soul { border-color: var(--positive-line); background: var(--positive-bg); }
+.palace-cell.is-body { border-color: var(--negative-line); background: var(--negative-bg); }
+.palace-cell.is-soul.is-body {
+  background: linear-gradient(135deg, var(--positive-bg), var(--negative-bg));
+  border-color: var(--accent);
+}
+.palace-cell header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+}
+.palace-cell .palace-name {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+.palace-cell .palace-tag {
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 4px;
+  letter-spacing: 0.06em;
+}
+.palace-cell .soul-tag { background: var(--positive); color: #fff; }
+.palace-cell .body-tag { background: var(--negative); color: #fff; }
+.palace-cell .palace-gz {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.palace-cell .palace-major {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+.palace-cell .star-major {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--positive);
+  line-height: 1.3;
+}
+.palace-cell .star-major em {
+  font-style: normal;
+  margin-left: 2px;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.palace-cell .palace-major.no-star {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.palace-cell .palace-minor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 2px;
+}
+.palace-cell .palace-minor span {
+  font-size: 10px;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+}
+
+.ziwei-center {
+  grid-row: 2 / span 2;
+  grid-column: 2 / span 2;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 4px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  text-align: center;
+}
+.ziwei-center .eyebrow { margin: 0; font-size: 10px; }
+.ziwei-center strong { font-size: 18px; font-weight: 800; color: var(--accent); letter-spacing: 0.04em; }
+
+/* 焦点宫主位卡 */
+.palace-main {
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  border-left: 5px solid var(--accent);
+  box-shadow: var(--shadow);
+}
+.palace-main > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.palace-main h4 { margin: 0 0 4px; font-size: 20px; font-weight: 800; }
+.palace-main-stars {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.star-major-large {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--positive);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--positive-bg);
+  border: 1px solid var(--positive-line);
+}
+.star-major-large em {
+  font-style: normal;
+  margin-left: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.palace-main .theme-word {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+}
+.palace-main .narrative {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--ink);
+}
+.palace-minors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.minor-chip {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+/* 八字 vs 紫微 折叠对照 */
+.ziwei-vs-bazi {
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+  border: 1px dashed var(--line);
+}
+.ziwei-vs-bazi > summary {
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  font-weight: 800;
+  list-style: none;
+}
+.ziwei-vs-bazi > summary::-webkit-details-marker { display: none; }
+.ziwei-vs-bazi[open] > summary { margin-bottom: 14px; }
+.ziwei-vs-bazi > summary > span { font-size: 14px; }
+.ziwei-vs-bazi > summary > b { color: var(--muted); font-weight: 700; font-size: 12px; }
+.vs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.vs-col {
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.vs-col h4 { margin: 0 0 6px; font-size: 15px; font-weight: 800; }
+.vs-col p { margin: 0; font-size: 13px; line-height: 1.7; color: var(--ink-soft); }
+.vs-conclusion { margin: 0; padding: 12px 14px; background: var(--surface); border-radius: 10px; font-size: 13px; }
+
+@media (max-width: 720px) {
+  .ziwei-grid { grid-template-rows: repeat(4, minmax(96px, 1fr)); }
+  .palace-cell { padding: 6px 7px; }
+  .palace-cell .palace-name { font-size: 11px; }
+  .palace-cell .star-major { font-size: 11px; }
+  .ziwei-center strong { font-size: 14px; }
+  .vs-grid { grid-template-columns: 1fr; }
+}
