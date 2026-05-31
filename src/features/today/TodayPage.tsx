@@ -9,6 +9,7 @@ import {
   themeNarrative,
   type NarrativeRow
 } from '../../engine/narrativize';
+import { buildQuestionFusion } from '../../engine/tarot-fusion';
 import type { DailyLuckResult, MemberProfile } from '../../types';
 
 const SUIT_LABEL: Record<NonNullable<DailyLuckResult['tarot']['suit']>, string> = {
@@ -225,16 +226,9 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
     setQuestion('');
   }
 
-  // 抽牌后 · 问题 × 牌融合
+  // 抽牌后 · 问题 × 牌融合（按完整 TarotCardData + reversed 输入 · 走专门 engine）
   const fusion = drawnCard && drawnFromQuestion
-    ? buildQuestionFusion(drawnFromQuestion, {
-        name: tarot.name,
-        reversed: tarot.reversed,
-        keywords: tarot.keywords,
-        core: tarot.core,
-        action: tarot.action,
-        advice: tarot.advice
-      })
+    ? buildQuestionFusion(drawnFromQuestion, drawnCard.card, drawnCard.reversed)
     : null;
 
   return (
@@ -268,11 +262,12 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
               <p className="fusion-q">「{fusion.question}」</p>
             </div>
             <div className="side-mid">
-              <p className="fusion-angle">这张牌切的角度 · <b>{fusion.angle}</b></p>
-              <p className="fusion-insight">{fusion.insight}</p>
+              <p className="fusion-angle">{fusion.angle}</p>
+              <p className="fusion-restatement">{fusion.restatement}</p>
+              <p className="fusion-insight"><b>{tarot.name}{tarot.reversed ? ' 逆位' : ' 正位'}：</b>{fusion.insight}</p>
               <p className="fusion-landing"><b>落到你的问题：</b>{fusion.landing}</p>
             </div>
-            <p className="side-foot">融合 = 牌的 keywords / core / advice 嫁接到你问的话题</p>
+            <p className="side-foot">融合 = 阿卡纳层级 × suit × 数字阶段 × 正逆 → 落到你问的话题</p>
           </section>
         ) : (
           <section className="ritual-side ritual-default">
@@ -342,54 +337,7 @@ function RitualSection({ label, body }: { label: string; body: string }) {
   );
 }
 
-// === 问题 × 牌融合（不调 LLM · 模板 + 关键词分类） ===
-type Matter = 'decision' | 'relation' | 'money' | 'timing' | 'speech' | 'health' | 'general';
-
-function detectMatter(q: string): Matter {
-  if (/(适合|要不要|要|该|该不该|应不应该|去不去|做不做|签|换|辞|跳|买|卖)/.test(q)) return 'decision';
-  if (/(关系|TA|他|她|对象|分手|表白|结婚|吵架|家人|父母|朋友|同事|相处)/.test(q)) return 'relation';
-  if (/(钱|签|合同|买|卖|项目|价格|涨|跌|理财|投资|工资|奖金)/.test(q)) return 'money';
-  if (/(时机|时间|什么时候|多久|快|慢|早|晚)/.test(q)) return 'timing';
-  if (/(说|讲|聊|发|沟通|表达|话|回复|回信)/.test(q)) return 'speech';
-  if (/(身体|健康|累|睡|生病|医生|疼|休息)/.test(q)) return 'health';
-  return 'general';
-}
-
-const MATTER_PHRASE: Record<Matter, string> = {
-  decision: '决定',
-  relation: '关系',
-  money: '钱与项目',
-  timing: '时机',
-  speech: '表达',
-  health: '身体',
-  general: '当下'
-};
-
-function buildQuestionFusion(
-  question: string,
-  card: { name: string; reversed: boolean; keywords: string[]; core: string; action: string; advice: string }
-) {
-  const q = question.trim();
-  const matter = detectMatter(q);
-  const angle = card.keywords.slice(0, 2).join(' · ');
-  // landing：先用 advice 接驳问题，再补一句 action
-  const matterTopic = MATTER_PHRASE[matter];
-  const positionWord = card.reversed ? '逆位' : '正位';
-
-  const insight = `${card.name}（${positionWord}）说：${card.core}`;
-
-  // 把 advice 跟问题主题挂钩
-  const landing = `这事是${matterTopic}的题——${card.advice} 具体动作：${card.action}`;
-
-  return {
-    question: q,
-    angle: `${angle} · 在${matterTopic}面上`,
-    insight,
-    landing
-  };
-}
-
-// 字符串 → 32 bit 哈希（不引依赖）
+// === 字符串 → 32 bit 哈希（不引依赖） ===
 function hashString(s: string): number {
   let h = 2166136261 >>> 0;
   for (let i = 0; i < s.length; i++) {

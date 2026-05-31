@@ -1614,9 +1614,27 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   border-left: 3px solid var(--accent);
 }
 .ritual-fusion .fusion-q { color: var(--ink); font-weight: 600; }
-.ritual-fusion .fusion-angle { color: var(--ink-soft); font-size: 11.5px; }
-.ritual-fusion .fusion-angle b { color: var(--accent); font-weight: 700; }
+.ritual-fusion .fusion-angle {
+  color: var(--ink-soft);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  padding: 4px 8px;
+  background: var(--surface);
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  display: inline-block;
+  align-self: flex-start;
+}
+.ritual-fusion .fusion-restatement {
+  color: var(--ink);
+  font-style: italic;
+  font-size: 12.5px;
+  line-height: 1.55;
+  padding-left: 10px;
+  border-left: 2px solid color-mix(in srgb, var(--accent) 50%, var(--line));
+}
 .ritual-fusion .fusion-insight { color: var(--ink); }
+.ritual-fusion .fusion-insight b { color: var(--ink); font-weight: 700; }
 .ritual-fusion .fusion-landing { color: var(--ink); }
 .ritual-fusion .fusion-landing b { color: var(--accent); font-weight: 700; }
 
