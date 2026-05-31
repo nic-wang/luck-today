@@ -9,7 +9,7 @@
  * 升级流程：改了代码想强制用户拿新版 → 改下面的 VERSION，push 后客户端会自动清旧缓存
  */
 
-const VERSION = 'v3-20260531-tarot-fusion-v2';
+const VERSION = 'v3-20260531-tarot-followup';
 const CACHE_NAME = `luck-today-${VERSION}`;
 
 self.addEventListener('install', event => {

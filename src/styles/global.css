@@ -3100,3 +3100,100 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
   .hub-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
   .hub-card img { width: 80px; height: 80px; }
 }
+
+/* 心相 · 追问区 */
+.ritual-followup {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-left: 3px solid color-mix(in srgb, var(--accent) 50%, var(--line));
+}
+.followup-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.followup-history {
+  display: grid;
+  gap: 8px;
+}
+.followup-bubble {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  display: grid;
+  gap: 4px;
+}
+.followup-bubble .fu-q {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.followup-bubble .fu-reading {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink);
+  white-space: pre-wrap; /* how 模板里有换行 */
+}
+.followup-bubble .fu-next {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink);
+}
+.followup-bubble .fu-next b { color: var(--accent); font-weight: 700; }
+.followup-bubble .fu-caveat {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+}
+/* 不同类型的追问加细节色 */
+.followup-bubble.fu-constraint { border-left: 3px solid var(--positive); }
+.followup-bubble.fu-when       { border-left: 3px solid var(--accent); }
+.followup-bubble.fu-how        { border-left: 3px solid var(--negative); }
+.followup-bubble.fu-who        { border-left: 3px solid var(--accent); }
+.followup-bubble.fu-why        { border-left: 3px solid var(--positive); }
+.followup-bubble.fu-what       { border-left: 3px solid var(--ink-soft); }
+
+.followup-ask {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+.followup-ask input {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12.5px;
+}
+.followup-ask input::placeholder { color: var(--muted); font-size: 11.5px; }
+.followup-ask button {
+  padding: 0 14px;
+  height: 34px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--bg);
+  font-weight: 700;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.followup-ask button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+@media (max-width: 720px) {
+  .followup-ask { grid-template-columns: 1fr auto; }
+}

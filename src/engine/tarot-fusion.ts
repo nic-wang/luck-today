@@ -325,3 +325,172 @@ function buildLanding(
     ? `${kw2}的反向状态${stageWord} · ${advice} 先做：${action}（${polarityHint}）`
     : `落在${kw} / ${kw2}${stageWord} · ${advice} 具体：${action}`;
 }
+
+// === 追问层 · 成熟塔罗师常用回应套路 ===
+// 用户在拿到第一段融合解读后再问 · 系统给出聚焦 / 落地的二次回答
+// 不再 reroll · 仍用同一张牌 · 但根据追问类型走不同路径
+
+export type FollowUpKind =
+  | 'constraint'  // 但是 · 必须 · 不得不（约束式追问）
+  | 'when'        // 什么时候 · 多久（时间问）
+  | 'who'         // 谁 · 什么样的人（人物问）
+  | 'how'         // 怎么 · 如何（步骤问）
+  | 'why'         // 为什么 · 凭什么（归因问）
+  | 'what'        // 什么意思 · 不懂（释义问）
+  | 'general';
+
+export interface FollowUpAnswer {
+  kind: FollowUpKind;
+  reading: string;   // 接住追问 · 一段更聚焦的解读
+  next: string;      // 一个具体的、可执行的下一步
+  caveat?: string;   // 这张牌的边界 / 做不了的事
+}
+
+const FOLLOWUP_RULES: Array<{ kind: FollowUpKind; pattern: RegExp }> = [
+  { kind: 'constraint', pattern: /(但|可是|然而|不得不|必须|要求|没办法|只能|偏要|偏偏|实在|没法|硬|得|要|得是)/ },
+  { kind: 'when',       pattern: /(什么时候|何时|多久|几点|多长|多快|多慢|今天|明天|这周|这月|月底|马上|立即|拖)/ },
+  { kind: 'who',        pattern: /(谁|哪种人|什么样的人|对象|找谁|找哪种|什么人)/ },
+  { kind: 'how',        pattern: /(怎么|如何|怎样|具体怎么|步骤|流程|做什么)/ },
+  { kind: 'why',        pattern: /(为什么|为啥|凭什么|怎么会|为何)/ },
+  { kind: 'what',       pattern: /(什么意思|不懂|不理解|啥意思|是说|意思是|意思|没看懂)/ }
+];
+
+export function detectFollowUpKind(q: string): FollowUpKind {
+  const s = q.trim();
+  for (const r of FOLLOWUP_RULES) {
+    if (r.pattern.test(s)) return r.kind;
+  }
+  return 'general';
+}
+
+// 数字阶段 → 时间窗口（成熟塔罗师常用映射）
+function timingWindow(num: number | null, reversed: boolean): string {
+  if (num === null) return reversed ? '会被拖延 · 别用线性时间预期' : '时机正在生成 · 1-2 周内显化';
+  if (reversed) {
+    if (num <= 3) return '比预期更慢 · 不在这周';
+    if (num <= 5) return '会被搅动 · 反而在解决前加剧';
+    if (num <= 7) return '看似停滞 · 1-2 周内会拐弯';
+    if (num <= 10) return '已过去 · 别再等 · 该收尾';
+    return '人物迟到 / 错位 · 别等';
+  }
+  if (num === 1) return '才刚开始 · 别问"何时" · 先动一下';
+  if (num <= 3) return '雏形阶段 · 这一周里能看出方向';
+  if (num === 4) return '会停留一阵 · 2-4 周';
+  if (num === 5) return '当下就是关口 · 24-72 小时内决断';
+  if (num === 6) return '正在调和 · 3-7 天内显现答案';
+  if (num === 7) return '路口期 · 1-2 周内必须选';
+  if (num === 8) return '内化期 · 慢慢显化 · 2-4 周';
+  if (num === 9) return '近完成 · 这一周内会自然落地';
+  if (num === 10) return '已经到了 · 把闭环做完';
+  return '人物近在身边 · 留意接下来 1 周';
+}
+
+// suit + court 映人物原型
+const PERSON_BY_SUIT: Record<TarotSuit, string> = {
+  wands:     '主动型 · 行动力强 · 有点闯 · 给你火气和推进',
+  cups:      '情感丰富 · 善聆听 · 直觉好 · 给你共情和温度',
+  swords:    '思辨型 · 理性 · 直言 · 给你边界和清醒',
+  pentacles: '务实型 · 资源稳 · 长线思维 · 给你保障和稳定'
+};
+const COURT_ROLE: Record<number, string> = {
+  11: '侍者级 · 学习者 / 探索者 · 年轻 / 新手 / 试水阶段',
+  12: '骑士级 · 推进者 / 行动派 · 直接 / 有冲劲',
+  13: '皇后级 · 内化者 / 滋养者 · 成熟 / 关怀',
+  14: '国王级 · 主宰者 / 整合者 · 资深 / 有权威'
+};
+
+// suit → "怎么做"的 3 步拆解
+const HOW_STEPS_BY_SUIT: Record<TarotSuit, [string, string, string]> = {
+  wands:     ['1) 认领你的目标 · 用一句话说出来', '2) 当众或对一个人公开宣布', '3) 今天就推第一个动作'],
+  cups:      ['1) 先连上自己的感受 · 写 3 行', '2) 把感受真实表达给对方', '3) 留出空间等回应 · 不催'],
+  swords:    ['1) 把事实和情绪分开列', '2) 写下你的假设 + 它的反面', '3) 找一条证据验证 / 反驳'],
+  pentacles: ['1) 列出你手上现有资源', '2) 做一个最小预算 / 时间表', '3) 下一步动手 · 不再纸上']
+};
+
+export function buildFollowUp(
+  card: TarotCardData,
+  isReversed: boolean,
+  _originalQuestion: string,
+  followUp: string
+): FollowUpAnswer {
+  const sig = analyzeCard(card, isReversed);
+  const kind = detectFollowUpKind(followUp);
+  const polarityWord = isReversed ? '逆位' : '正位';
+  const cardName = `${card.name} ${polarityWord}`;
+
+  switch (kind) {
+    case 'constraint': {
+      // 用户在 push back · 给"如果非做不可"的桥接式答疑
+      const risk = isReversed
+        ? `这张牌（${cardName}）警告的就是反向 / 内在阻塞 · 你强推会让阻塞更深`
+        : `这张牌（${cardName}）的提醒不是"不要做" · 是"带着这份觉察做"`;
+      return {
+        kind,
+        reading: `${risk}。${card.advice}`,
+        next: `${card.action}（在做之前先把"${card.keywords[0]}"明确给自己看一眼）`,
+        caveat: '塔罗不替你拍板 · 它只标记你忽略了什么'
+      };
+    }
+    case 'when': {
+      return {
+        kind,
+        reading: `时间窗口：${timingWindow(sig.number, isReversed)}。${card.advice}`,
+        next: `今天先做：${card.action}（这一步本身会让时间显化）`
+      };
+    }
+    case 'who': {
+      const isCourt = sig.number !== null && sig.number >= 11;
+      const personHint = sig.suit
+        ? (isCourt ? `${COURT_ROLE[sig.number!]} · 在 ${PERSON_BY_SUIT[sig.suit].split(' · ')[0]} 这一域` : PERSON_BY_SUIT[sig.suit])
+        : '一个能让你看清当前命题的人';
+      const reversedNote = isReversed ? '· 但留意此人可能是"反向版本" · 表面像但底层不是' : '';
+      return {
+        kind,
+        reading: `这张牌指向的人物原型：${personHint} ${reversedNote}`.trim(),
+        next: `今天留意身边谁符合这个原型 · ${card.action}`
+      };
+    }
+    case 'how': {
+      if (!sig.suit) {
+        // 大阿没有 suit · 给 advice + action 简化版
+        return {
+          kind,
+          reading: `${card.advice} 大阿尔卡纳层级不需要分步骤 · 这是命题级动作`,
+          next: card.action
+        };
+      }
+      const [s1, s2, s3] = HOW_STEPS_BY_SUIT[sig.suit];
+      return {
+        kind,
+        reading: `按 ${sig.suit === 'wands' ? '权杖' : sig.suit === 'cups' ? '圣杯' : sig.suit === 'swords' ? '宝剑' : '钱币'} 能量拆 3 步：\n${s1}\n${s2}\n${s3}`,
+        next: `从第 1 步开始 · 今天就把它做掉`
+      };
+    }
+    case 'why': {
+      const why = isReversed
+        ? `因为这件事的能量被"${card.keywords[0]}"反向卡住 · 不是外部不公 · 是内在还没消化`
+        : `因为这是"${card.keywords[0]}"的自然演进 · 该出现的现在就在显化`;
+      const stageHint = sig.stage ? `当前是「${sig.stage}」` : '';
+      return {
+        kind,
+        reading: `${why}。${stageHint} ${card.advice}`.trim(),
+        next: card.action
+      };
+    }
+    case 'what': {
+      const meaning = isReversed ? card.reversed : card.upright;
+      return {
+        kind,
+        reading: `${cardName} = "${card.core}" 落到日常说就是：${meaning} 关键词：${card.keywords.join(' · ')}`,
+        next: card.action
+      };
+    }
+    default: {
+      return {
+        kind,
+        reading: `回到这张牌的核心：${card.core} 你问的"${followUp.slice(0, 24)}${followUp.length > 24 ? '...' : ''}"在这张牌看来 = ${card.keywords[0]}的题`,
+        next: card.action
+      };
+    }
+  }
+}

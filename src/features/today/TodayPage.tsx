@@ -9,7 +9,7 @@ import {
   themeNarrative,
   type NarrativeRow
 } from '../../engine/narrativize';
-import { buildQuestionFusion } from '../../engine/tarot-fusion';
+import { buildFollowUp, buildQuestionFusion, type FollowUpAnswer } from '../../engine/tarot-fusion';
 import type { DailyLuckResult, MemberProfile } from '../../types';
 
 const SUIT_LABEL: Record<NonNullable<DailyLuckResult['tarot']['suit']>, string> = {
@@ -199,6 +199,10 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
   const [drawnCard, setDrawnCard] = useState<{ card: TarotCardData; reversed: boolean } | null>(null);
   const [drawnFromQuestion, setDrawnFromQuestion] = useState('');
 
+  // 追问 state
+  const [followUpDraft, setFollowUpDraft] = useState('');
+  const [followUpHistory, setFollowUpHistory] = useState<Array<{ q: string; answer: FollowUpAnswer }>>([]);
+
   // 实际渲染用的牌
   const tarot = drawnCard
     ? {
@@ -218,12 +222,24 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
     const reversed = ((seed >> 8) & 1) === 1;
     setDrawnCard({ card, reversed });
     setDrawnFromQuestion(question);
+    // 抽新牌时清空追问历史（牌都换了 · 之前的追问失效）
+    setFollowUpHistory([]);
+    setFollowUpDraft('');
   }
 
   function reset() {
     setDrawnCard(null);
     setDrawnFromQuestion('');
     setQuestion('');
+    setFollowUpHistory([]);
+    setFollowUpDraft('');
+  }
+
+  function submitFollowUp() {
+    if (!drawnCard || !followUpDraft.trim()) return;
+    const answer = buildFollowUp(drawnCard.card, drawnCard.reversed, drawnFromQuestion, followUpDraft);
+    setFollowUpHistory(h => [...h, { q: followUpDraft, answer }]);
+    setFollowUpDraft('');
   }
 
   // 抽牌后 · 问题 × 牌融合（按完整 TarotCardData + reversed 输入 · 走专门 engine）
@@ -267,7 +283,6 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
               <p className="fusion-insight"><b>{tarot.name}{tarot.reversed ? ' 逆位' : ' 正位'}：</b>{fusion.insight}</p>
               <p className="fusion-landing"><b>落到你的问题：</b>{fusion.landing}</p>
             </div>
-            <p className="side-foot">融合 = 阿卡纳层级 × suit × 数字阶段 × 正逆 → 落到你问的话题</p>
           </section>
         ) : (
           <section className="ritual-side ritual-default">
@@ -286,6 +301,41 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
           </section>
         )}
       </div>
+
+      {/* 追问区 · 仅抽牌后显示 · 不重抽 · 用同一张牌做聚焦回答 */}
+      {fusion && (
+        <section className="ritual-followup">
+          <header className="followup-head">
+            <span className="ritual-section-label">追问 · 不清楚就再问一句</span>
+            <span className="muted small">不换牌 · 用同一张牌给更聚焦的回答</span>
+          </header>
+
+          {followUpHistory.length > 0 && (
+            <div className="followup-history">
+              {followUpHistory.map((h, i) => (
+                <article key={i} className={`followup-bubble fu-${h.answer.kind}`}>
+                  <p className="fu-q">「{h.q}」</p>
+                  <p className="fu-reading">{h.answer.reading}</p>
+                  <p className="fu-next"><b>具体一步：</b>{h.answer.next}</p>
+                  {h.answer.caveat && <p className="fu-caveat muted small">{h.answer.caveat}</p>}
+                </article>
+              ))}
+            </div>
+          )}
+
+          <div className="followup-ask">
+            <input
+              value={followUpDraft}
+              onChange={e => setFollowUpDraft(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') submitFollowUp(); }}
+              placeholder='追问 · 比如"但是我必须今天签" / "那大概什么时候" / "具体怎么做"'
+            />
+            <button type="button" onClick={submitFollowUp} disabled={!followUpDraft.trim()}>
+              {followUpHistory.length > 0 ? '再追问' : '追问'}
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* 置底 strip：5 段释义（折叠 · 默认收起 · 想看再展开） */}
       <details className="ritual-strip">
