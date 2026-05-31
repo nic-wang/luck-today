@@ -7,6 +7,9 @@ import { FamilyBoard } from '../features/family/FamilyBoard';
 import { FortunePage } from '../features/fortune/FortunePage';
 import { TodayPage } from '../features/today/TodayPage';
 import { ZiweiPage } from '../features/ziwei/ZiweiPage';
+import { GuestModeApp } from './GuestModeApp';
+import { GuestForm } from './GuestForm';
+import { useGuestProfile } from './useGuestProfile';
 import { usePinGate } from './usePinGate';
 import { useTheme, type ThemeMode } from './useTheme';
 
@@ -20,15 +23,77 @@ const views: Array<{ key: ViewKey; label: string }> = [
   { key: 'explain', label: '解释' }
 ];
 
+type AuthMode = 'pin' | 'guest' | null;
+
 export function App() {
-  const [view, setView] = useState<ViewKey>('today');
-  const { passed, defaultMemberId, error, submit, isPwa } = usePinGate();
-  // focusId 由 PIN 决定初始值 · 整站单人视角
-  const [focusId, setFocusId] = useState<string>(defaultMemberId);
-  // PIN 通过后同步 focusId（首次设默认）
+  const pin = usePinGate();
+  const guest = useGuestProfile();
+  const [authMode, setAuthMode] = useState<AuthMode>(null);
+
+  // 启动时：URL 携带 ?guest= 参数 → 自动导入 + 进访客模式
   useEffect(() => {
-    if (passed) setFocusId(defaultMemberId);
-  }, [passed, defaultMemberId]);
+    if (typeof window === 'undefined') return;
+    const search = new URLSearchParams(window.location.search);
+    if (search.has('guest')) {
+      const imported = guest.importFromUrl(search);
+      if (imported) {
+        setAuthMode('guest');
+        // 清掉 URL 参数 · 防止反复 import
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // PIN 验证通过 → 切到 PIN 模式
+  useEffect(() => {
+    if (pin.passed) setAuthMode('pin');
+  }, [pin.passed]);
+
+  // 已有 guest profile · 访客已登录
+  useEffect(() => {
+    if (guest.profile && !pin.passed) setAuthMode('guest');
+  }, [guest.profile, pin.passed]);
+
+  function handleCreateGuest(input: Parameters<typeof guest.createGuest>[0]) {
+    guest.createGuest(input);
+    setAuthMode('guest');
+  }
+
+  function handleResumeGuest() {
+    const resumed = guest.resumeFromStorage();
+    if (resumed) setAuthMode('guest');
+  }
+
+  function handleGuestLogout() {
+    guest.deleteGuest();
+    setAuthMode(null);
+  }
+
+  if (authMode === 'guest' && guest.profile) {
+    return <GuestModeApp profile={guest.profile} onLogout={handleGuestLogout} updateGuest={guest.updateGuest} exportShareUrl={guest.exportShareUrl} />;
+  }
+
+  if (authMode === 'pin') {
+    return <PinModeApp pinDefaultId={pin.defaultMemberId} />;
+  }
+
+  return (
+    <PinGate
+      error={pin.error}
+      isPwa={pin.isPwa}
+      hasGuestStored={guest.hasStored}
+      onSubmit={pin.submit}
+      onCreateGuest={handleCreateGuest}
+      onResumeGuest={handleResumeGuest}
+    />
+  );
+}
+
+function PinModeApp({ pinDefaultId }: { pinDefaultId: 'niu' | 'xixi' }) {
+  const [view, setView] = useState<ViewKey>('today');
+  const [focusId, setFocusId] = useState<string>(pinDefaultId);
+  useEffect(() => { setFocusId(pinDefaultId); }, [pinDefaultId]);
 
   const { mode, cycle } = useTheme();
   const today = useMemo(() => new Date(), []);
@@ -53,10 +118,8 @@ export function App() {
 
   return (
     <div className="shell">
-      {!passed && <PinGate error={error} isPwa={isPwa} onSubmit={submit} />}
       <header className="top">
         <div className="brand-block">
-          {/* 当前聚焦人头像 · 点 → 进 hub 选人页 */}
           <button type="button" className="brand-avatar" onClick={gotoHub} aria-label="切换视角">
             <img src={`${import.meta.env.BASE_URL}${focusMember.photo}`} alt={focusMember.name} />
           </button>
@@ -64,7 +127,6 @@ export function App() {
             <p className="eyebrow">Luck Today OS · {focusMember.name} 视角</p>
             <h1>命理今日</h1>
           </div>
-          {/* 对方头像 · 点 = 直接切到对方 */}
           <button
             type="button"
             className="switch-avatar"
@@ -179,13 +241,20 @@ function ThemeToggle({ mode, onCycle }: { mode: ThemeMode; onCycle: () => void }
 function PinGate({
   error,
   isPwa,
-  onSubmit
+  hasGuestStored,
+  onSubmit,
+  onCreateGuest,
+  onResumeGuest
 }: {
   error: boolean;
   isPwa: boolean;
+  hasGuestStored: boolean;
   onSubmit: (pin: string) => Promise<boolean>;
+  onCreateGuest: (input: Parameters<ReturnType<typeof useGuestProfile>['createGuest']>[0]) => void;
+  onResumeGuest: () => void;
 }) {
   const [pin, setPin] = useState('');
+  const [showGuestForm, setShowGuestForm] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function update(value: string) {
@@ -201,13 +270,28 @@ function PinGate({
     inputRef.current?.focus();
   }
 
+  if (showGuestForm) {
+    return (
+      <div className="pin-overlay">
+        <div className="pin-card guest-card">
+          <h2>新建访客档案</h2>
+          <p className="muted small">填这 4 项 · 立刻看自己的命理今日</p>
+          <GuestForm
+            submitLabel="生成档案 · 进入"
+            onSubmit={input => onCreateGuest(input)}
+            onCancel={() => setShowGuestForm(false)}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="pin-overlay" onClick={focusInput}>
       <div className={`pin-card ${error ? 'shake' : ''}`}>
-        <div className="pin-icon">🔐</div>
+        <div className="pin-icon">PIN</div>
         <h2>命理今日</h2>
         <p>{isPwa ? '访问码 · 已安装版本会记住' : '点击下方圆点 · 输入 4 位访问码'}</p>
-        {/* label 包裹：tap dots = 自动 focus input · 解决 mobile 无法输入 */}
         <label className="pin-input-area">
           <span className="pin-dots" aria-hidden="true">
             {[0, 1, 2, 3].map(index => <span key={index} className={index < pin.length ? 'filled' : ''} />)}
@@ -224,6 +308,23 @@ function PinGate({
             onChange={event => update(event.target.value)}
           />
         </label>
+
+        <div className="pin-divider"><span>或</span></div>
+
+        <div className="pin-guest-actions">
+          {hasGuestStored && (
+            <button type="button" className="pin-guest-btn pin-guest-resume" onClick={onResumeGuest}>
+              继续上次档案
+            </button>
+          )}
+          <button type="button" className="pin-guest-btn pin-guest-create" onClick={() => setShowGuestForm(true)}>
+            新建访客档案
+          </button>
+        </div>
+
+        <p className="pin-foot muted small">
+          访客档案存你自己浏览器 · 完全隔离主理人数据
+        </p>
       </div>
     </div>
   );

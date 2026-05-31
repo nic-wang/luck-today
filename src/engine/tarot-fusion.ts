@@ -1,17 +1,17 @@
 // 塔罗 × 用户问题融合算法（不调 LLM · 多维信号 × 模板规则）
 //
-// 设计原则（来自成熟塔罗师常规解读手法）：
-// 1. 不直接 yes/no · 把问题"翻译"到牌的能量框架里
-// 2. 大阿尔卡纳 = 命题级（人生主轴）/ 小阿尔卡纳 = 当下层（具体局面）
-// 3. 小阿尔卡纳 = suit + number 共同决定能量类型：
-//      wands 火 = 行动 / 推进 / 激情
-//      cups 水 = 感受 / 关系 / 情感
-//      swords 风 = 思辨 / 沟通 / 冲突
-//      pentacles 土 = 物质 / 资源 / 稳定
-// 4. 数字阶段：1 起点 / 2-3 形成 / 4 稳 / 5 危机 / 6 平衡 / 7 抉择
-//             8 内化 / 9 接近完成 / 10 闭环 / 11-14 宫廷牌（人）
-// 5. 正位 = 顺势 / 逆位 = 反向 · 内在 · 阻塞 · 过度
-// 6. 解读 = "重述问题" → "牌的视角" → "落到行动"，不机械拼接
+// 设计原则（v3 · 接地气版 · 2026-05）：
+// 1. 第一屏 = 直答 + 一句牌面解读 + 具体起手 · 不玩"重述问题"元话术
+// 2. 抽用户问题里的"动词短语"做 subject 塞进 verdict 模板（"今天先别{去运动}"）
+// 3. tone（go / halt / soft）由 (matter, suit, reversed, isMajor) 三维决定
+// 4. 进阶 / 升华内容（生命命题、能量框架）藏到"展开 5 段释义" + 追问层 · 不在第一屏露出
+//
+// 牌的能量映射（保留）：
+//   wands 火 = 行动 / 推进 / 激情
+//   cups 水 = 感受 / 关系 / 情感
+//   swords 风 = 思辨 / 沟通 / 冲突
+//   pentacles 土 = 物质 / 资源 / 稳定
+// 数字阶段：1 起点 / 2-3 形成 / 4 稳 / 5 危机 / 6 平衡 / 7 抉择 / 8 内化 / 9 接近 / 10 闭环 / 11-14 宫廷
 
 import type { TarotCardData, TarotSuit } from '../data/tarot-rws-78';
 
@@ -25,12 +25,15 @@ export type Matter =
   | 'general';    // 一般
 
 const MATTER_RULES: Array<{ matter: Matter; pattern: RegExp }> = [
+  // health 提到前面：运动 / 跑步 / 健身 / 打球 这些是身体类行为
+  { matter: 'health',   pattern: /(身体|健康|运动|跑步|健身|打球|游泳|爬山|瑜伽|hiit|HIIT|累|睡|生病|医生|疼|休息|疲劳|焦虑|喝酒|抽烟)/ },
   { matter: 'relation', pattern: /(关系|TA|他|她|对象|分手|表白|结婚|吵架|家人|父母|朋友|同事|相处|喜欢|爱)/ },
   { matter: 'money',    pattern: /(钱|签|合同|买|卖|项目|价格|涨|跌|理财|投资|工资|奖金|生意|股票|赚)/ },
-  { matter: 'timing',   pattern: /(时机|时间|什么时候|多久|快|慢|早|晚|现在|今天|何时)/ },
   { matter: 'speech',   pattern: /(说|讲|聊|发|沟通|表达|话|回复|回信|告诉|提)/ },
-  { matter: 'health',   pattern: /(身体|健康|累|睡|生病|医生|疼|休息|疲劳|焦虑)/ },
-  { matter: 'decision', pattern: /(适合|要不要|要|该|该不该|应不应该|去不去|做不做|换|辞|跳)/ }
+  // timing 砍掉"今天 / 现在"——太常见，几乎每条问题都带；只留真正问时间的
+  { matter: 'timing',   pattern: /(什么时候|何时|多久|多长|多快|多慢|早还是晚|时机)/ },
+  // decision 兜底：所有"适合 / 要不要 / 该不该 / 去不去"都收进来
+  { matter: 'decision', pattern: /(适合|要不要|该不该|应不应该|去不去|做不做|换工作|辞职|跳槽|该|要)/ }
 ];
 
 export function detectMatter(q: string): Matter {
@@ -39,6 +42,109 @@ export function detectMatter(q: string): Matter {
   }
   return 'general';
 }
+
+// === Subject 抽取 · 把"今天适合去运动吗"里的"去运动"抠出来塞进 verdict 模板 ===
+// 没抽到就 verdict 用兜底句式（不带 subject）· 不强求
+export function extractSubject(q: string): string {
+  const s = q.trim().replace(/[?？。.！!，,\s]+$/g, '');
+  // 模式 1：「(今天)?适合 X (吗)?」· 最常见
+  let m = s.match(/(?:今天|现在|这|当下)?\s*适合(.{1,15}?)(?:吗|嘛|不|么|\?|？|$)/);
+  if (m && m[1]) return cleanSubject(m[1]);
+  // 模式 2：「要不要 / 该不该 / 去不去 / 做不做 / 应不应该 X」
+  m = s.match(/(?:要不要|该不该|应不应该|去不去|做不做|可不可以|能不能)(.{1,15})/);
+  if (m && m[1]) return cleanSubject(m[1]);
+  // 模式 3：「X 行不行 / 可以吗 / 怎么样 / 合适吗」
+  m = s.match(/(.{2,15})(?:行不行|可以吗|怎么样|怎样|合适吗|好不好|对不对)/);
+  if (m && m[1]) return cleanSubject(m[1]);
+  // 模式 4：「我(要|想|该|要不要) X」
+  m = s.match(/我(?:要|想|该|要不要|想要)(.{2,15})/);
+  if (m && m[1]) return cleanSubject(m[1]);
+  return '';
+}
+
+function cleanSubject(s: string): string {
+  return s
+    .replace(/[?？。.！!，,]/g, '')
+    .replace(/^(今天|现在|这|当下)+/, '')   // 只剥时间状语 · 不剥"做/去/要/该"等动词，否则名词类 subject（如 HIIT、瑜伽）会读不通
+    .replace(/(吗|嘛|呢|啊|哦|哈)+$/, '')
+    .trim();
+}
+
+// === Verdict tone · go / halt / soft 三档 ===
+// go   = 可以做 / halt = 别做 / soft = 看情况 · 带条件去
+type VerdictTone = 'go' | 'halt' | 'soft';
+
+function pickVerdictTone(card: TarotCardData, reversed: boolean): VerdictTone {
+  if (card.arcana === 'major') {
+    // 大阿正位也偏阻塞的几张：恶魔（执念）/ 高塔（震荡）/ 月亮（迷雾）
+    if (!reversed && [15, 16, 18].includes(card.id)) return 'halt';
+    // 大阿正位强 go：魔术师 / 战车 / 星星 / 太阳 / 审判 / 世界
+    if (!reversed && [1, 7, 17, 19, 20, 21].includes(card.id)) return 'go';
+    return reversed ? 'soft' : 'go';
+  }
+  // 小阿
+  if (reversed) {
+    // 宝剑/钱币逆位最严（思路不清 / 底子不稳）· 圣杯/权杖逆位偏 soft
+    if (card.suit === 'swords' || card.suit === 'pentacles') return 'halt';
+    return 'soft';
+  }
+  // 正位但数字本身偏挑战
+  if (card.number === 5) return 'soft';                              // 5 = 摩擦
+  if (card.number === 4 && (card.suit === 'swords' || card.suit === 'cups')) return 'soft'; // 宝剑四（休整 · 该停）/ 圣杯四（倦怠）
+  if (card.number === 9 && card.suit === 'swords') return 'halt';    // 宝剑九 = 焦虑
+  if (card.number === 7 && card.suit === 'cups') return 'soft';      // 圣杯七 = 选择困难
+  if (card.number === 8 && card.suit === 'swords') return 'soft';    // 宝剑八 = 自缚
+  return 'go';
+}
+
+// === Verdict 模板 · matter × tone ===
+// subject 是用户问题里抽出的动词短语（"去运动" / "签合同" / "找他聊"）· 没抽到就走兜底
+// 语序原则：go/halt 都是「今天可以/先别 + subject」前置时间，soft 是「可以 + subject + 转折」
+type VerdictBuilder = (subject: string) => string;
+const VERDICT_BY_MATTER: Record<Matter, Record<VerdictTone, VerdictBuilder>> = {
+  decision: {
+    go:   s => s ? `今天可以${s}。`              : '今天可以做。',
+    halt: s => s ? `今天先别${s}。`              : '今天先放一下。',
+    soft: s => s ? `可以${s}，但带着觉察去。`    : '可以，但带着觉察去。'
+  },
+  money: {
+    go:   s => s ? `${s}可以，确认细节即可。`    : '可以推进，确认条款。',
+    halt: s => s ? `今天先别${s}。`              : '今天别签 / 别下单，缓一下。',
+    soft: s => s ? `可以${s}，但要砍一刀细节。`  : '可以推进，但要砍一刀细节。'
+  },
+  relation: {
+    go:   s => s ? `今天可以${s}。`              : '可以走近一步。',
+    halt: s => s ? `今天先别${s}。`              : '今天先别开口。',
+    soft: s => s ? `可以${s}，别压全注。`        : '可以试探，别压全注。'
+  },
+  timing: {
+    go:   () => '现在就是窗口，可以动。',
+    halt: () => '不是现在，再等等。',
+    soft: () => '能动，但别赶。'
+  },
+  speech: {
+    go:   s => s ? `${s}该说就说。`              : '该说就说。',
+    halt: s => s ? `今天先别${s}。`              : '今天先别说。',
+    soft: s => s ? `可以${s}，但换个说法。`      : '可以说，但换个说法。'
+  },
+  health: {
+    go:   s => s ? `今天可以${s}。`              : '状态在，可以做。',
+    halt: s => s ? `今天先别${s}。`              : '今天歇一下，别硬来。',
+    soft: s => s ? `可以${s}，强度减半。`        : '可以做，强度减半。'
+  },
+  general: {
+    go:   s => s ? `${s}，可以。`                : '可以。',
+    halt: s => s ? `${s}今天先放放。`            : '今天先放一下。',
+    soft: s => s ? `可以${s}，但先做小一步。`    : '看情况，先做小一步。'
+  }
+};
+
+// === Action 导语 · 跟 verdict tone 对齐口径 ===
+const ACTION_LABEL_BY_TONE: Record<VerdictTone, string> = {
+  go:   '建议起手',
+  halt: '替代动作',
+  soft: '轻量起手'
+};
 
 // === Suit × Matter · 把用户问题"翻译"成牌的能量框架 ===
 // 不是回答问题，是说"这张牌看待你这个问题的角度是 XX"
@@ -148,10 +254,18 @@ function analyzeCard(card: TarotCardData, reversed: boolean): CardSignal {
 
 export interface QuestionFusion {
   question: string;
-  angle: string;        // 这张牌切的角度（一行 chip）
-  restatement: string;  // 把问题重述到牌的视角
-  insight: string;      // 牌说什么 + 数字阶段 / 主题
-  landing: string;      // 落到具体行动 · 不再机械拼 advice + action
+  // === 第一屏（v3 新口径 · 直答 + 一句解读 + 起手）===
+  verdict: string;       // 直答："今天先别去运动。" / "今天可以推进。"
+  reasoning: string;     // 一句牌面解读："宝剑后 逆位：冷漠 · 还在内化期。"
+  action: string;        // 具体起手（用 card.action）
+  actionLabel: string;   // "建议起手" / "替代动作" / "轻量起手"
+  tone: 'go' | 'halt' | 'soft';
+  subject: string;       // 抽到的用户问题主词（空串表示没抽到）
+  // === 标签 + 兼容字段（旧版字段保留 · 折叠在底部"展开 5 段释义"里展示进阶解读）===
+  angle: string;         // chip：层级 · 能量域 · 阶段 · 正逆
+  restatement: string;   // 旧 v2："这张牌把你的问题翻成 XX"——藏到详细释义
+  insight: string;       // 旧 v2：牌的 upright/reversed 一句 + 阶段
+  landing: string;       // 旧 v2：matter × suit × polarity 拼接的落地解读
 }
 
 export function buildQuestionFusion(
@@ -162,6 +276,8 @@ export function buildQuestionFusion(
   const q = question.trim();
   const matter = detectMatter(q);
   const sig = analyzeCard(card, isReversed);
+  const subject = extractSubject(q);
+  const tone = pickVerdictTone(card, isReversed);
 
   // === angle · 一行 chip：层级 · 能量域 · 阶段 · 正逆 ===
   const angleParts: string[] = [];
@@ -175,7 +291,20 @@ export function buildQuestionFusion(
   angleParts.push(sig.reversed ? '逆位 · 反向' : '正位 · 顺势');
   const angle = angleParts.join(' · ');
 
-  // === restatement · 把问题翻译成牌的视角 ===
+  // === verdict · 直答（v3 核心）===
+  const verdict = VERDICT_BY_MATTER[matter][tone](subject);
+
+  // === reasoning · 一句牌面解读（牌名 + 正逆 + upright/reversed 文本 + 阶段提示）===
+  const polarityLabel = sig.reversed ? '逆位' : '正位';
+  const meaning = sig.reversed ? card.reversed : card.upright;
+  const stageTail = sig.stage ? ` · ${sig.stage}` : '';
+  const reasoning = `${card.name} ${polarityLabel}：${meaning.replace(/。$/, '')}${stageTail}`;
+
+  // === action · 具体起手（用 card.action 不变，只换 label）===
+  const action = card.action;
+  const actionLabel = ACTION_LABEL_BY_TONE[tone];
+
+  // === 旧字段（v2）· 保留供详细释义展开使用 · 不在第一屏渲染 ===
   let restatement: string;
   if (sig.tier === 'major') {
     const lifeTheme = MAJOR_LIFE_THEME[card.id] ?? '看清这件事在你人生里的位置';
@@ -186,16 +315,24 @@ export function buildQuestionFusion(
   } else {
     restatement = `把问题放到 ${card.keywords[0] ?? '当下'} 的视角下看`;
   }
-
-  // === insight · 牌的核心一句 + 阶段提示 + 正逆调整 ===
   const insightCore = sig.reversed ? card.reversed : card.upright;
   const stageHint = sig.stage ? ` 当前阶段：${sig.stage}。` : '';
   const insight = `${insightCore}${stageHint}`;
-
-  // === landing · matter × signal 的真正解读 + 一个具体动作 ===
   const landing = buildLanding(matter, sig, card, q);
 
-  return { question: q, angle, restatement, insight, landing };
+  return {
+    question: q,
+    verdict,
+    reasoning,
+    action,
+    actionLabel,
+    tone,
+    subject,
+    angle,
+    restatement,
+    insight,
+    landing
+  };
 }
 
 // landing 模板：matter × tier × polarity 三维分支
@@ -341,26 +478,35 @@ export type FollowUpKind =
 
 export interface FollowUpAnswer {
   kind: FollowUpKind;
+  bridge?: string;   // 承接：回到原问 / 接住上一轮 · 让多轮有 thread 感
   reading: string;   // 接住追问 · 一段更聚焦的解读
   next: string;      // 一个具体的、可执行的下一步
   caveat?: string;   // 这张牌的边界 / 做不了的事
 }
 
-const FOLLOWUP_RULES: Array<{ kind: FollowUpKind; pattern: RegExp }> = [
-  { kind: 'constraint', pattern: /(但|可是|然而|不得不|必须|要求|没办法|只能|偏要|偏偏|实在|没法|硬|得|要|得是)/ },
-  { kind: 'when',       pattern: /(什么时候|何时|多久|几点|多长|多快|多慢|今天|明天|这周|这月|月底|马上|立即|拖)/ },
-  { kind: 'who',        pattern: /(谁|哪种人|什么样的人|对象|找谁|找哪种|什么人)/ },
-  { kind: 'how',        pattern: /(怎么|如何|怎样|具体怎么|步骤|流程|做什么)/ },
-  { kind: 'why',        pattern: /(为什么|为啥|凭什么|怎么会|为何)/ },
-  { kind: 'what',       pattern: /(什么意思|不懂|不理解|啥意思|是说|意思是|意思|没看懂)/ }
+// 加权打分 · 多个 pattern 都命中时取分最高的
+// constraint 是兜底类（"但/必须/得"用词太泛），weight 给低；when/who/how 是明确询问，weight 给高
+// 例："但是大概什么时候要签呢" → constraint(1) + when(3) → when 胜出
+const FOLLOWUP_RULES: Array<{ kind: FollowUpKind; pattern: RegExp; weight: number }> = [
+  { kind: 'when',       pattern: /(什么时候|何时|多久|几点|多长|多快|多慢|今天|明天|这周|这月|月底|马上|立即|拖)/, weight: 3 },
+  { kind: 'who',        pattern: /(谁|哪种人|什么样的人|对象|找谁|找哪种|什么人)/, weight: 3 },
+  { kind: 'how',        pattern: /(怎么|如何|怎样|具体怎么|步骤|流程|做什么)/, weight: 3 },
+  { kind: 'why',        pattern: /(为什么|为啥|凭什么|怎么会|为何)/, weight: 2 },
+  { kind: 'what',       pattern: /(什么意思|不懂|不理解|啥意思|是说|意思是|意思|没看懂)/, weight: 2 },
+  { kind: 'constraint', pattern: /(但|可是|然而|不得不|必须|要求|没办法|只能|偏要|偏偏|实在|没法|硬|得|要|得是)/, weight: 1 }
 ];
 
 export function detectFollowUpKind(q: string): FollowUpKind {
   const s = q.trim();
+  let bestKind: FollowUpKind = 'general';
+  let bestScore = 0;
   for (const r of FOLLOWUP_RULES) {
-    if (r.pattern.test(s)) return r.kind;
+    if (r.pattern.test(s) && r.weight > bestScore) {
+      bestKind = r.kind;
+      bestScore = r.weight;
+    }
   }
-  return 'general';
+  return bestKind;
 }
 
 // 数字阶段 → 时间窗口（成熟塔罗师常用映射）
@@ -410,13 +556,18 @@ const HOW_STEPS_BY_SUIT: Record<TarotSuit, [string, string, string]> = {
 export function buildFollowUp(
   card: TarotCardData,
   isReversed: boolean,
-  _originalQuestion: string,
+  originalQuestion: string,
   followUp: string
 ): FollowUpAnswer {
   const sig = analyzeCard(card, isReversed);
   const kind = detectFollowUpKind(followUp);
   const polarityWord = isReversed ? '逆位' : '正位';
   const cardName = `${card.name} ${polarityWord}`;
+
+  // 原问题的简要回指 · 14 字以内 · 让多轮答案有 thread 感
+  const origQ = originalQuestion.trim();
+  const origRef = origQ ? (origQ.length > 14 ? origQ.slice(0, 14) + '…' : origQ) : '';
+  const bridgeBack = origRef ? `回到你最初问的「${origRef}」` : '回到你抽这张牌的初衷';
 
   switch (kind) {
     case 'constraint': {
@@ -426,6 +577,7 @@ export function buildFollowUp(
         : `这张牌（${cardName}）的提醒不是"不要做" · 是"带着这份觉察做"`;
       return {
         kind,
+        bridge: `${bridgeBack} · 你这是在 push back · 想"如果非做不可怎么办"。`,
         reading: `${risk}。${card.advice}`,
         next: `${card.action}（在做之前先把"${card.keywords[0]}"明确给自己看一眼）`,
         caveat: '塔罗不替你拍板 · 它只标记你忽略了什么'
@@ -434,6 +586,7 @@ export function buildFollowUp(
     case 'when': {
       return {
         kind,
+        bridge: `${bridgeBack} · 你想知道时间窗口。`,
         reading: `时间窗口：${timingWindow(sig.number, isReversed)}。${card.advice}`,
         next: `今天先做：${card.action}（这一步本身会让时间显化）`
       };
@@ -446,6 +599,7 @@ export function buildFollowUp(
       const reversedNote = isReversed ? '· 但留意此人可能是"反向版本" · 表面像但底层不是' : '';
       return {
         kind,
+        bridge: `${bridgeBack} · 你想知道这事会经过谁、由谁带出来。`,
         reading: `这张牌指向的人物原型：${personHint} ${reversedNote}`.trim(),
         next: `今天留意身边谁符合这个原型 · ${card.action}`
       };
@@ -455,6 +609,7 @@ export function buildFollowUp(
         // 大阿没有 suit · 给 advice + action 简化版
         return {
           kind,
+          bridge: `${bridgeBack} · 你想要具体步骤。这张是大阿层级，给的是命题级动作不是技术拆解。`,
           reading: `${card.advice} 大阿尔卡纳层级不需要分步骤 · 这是命题级动作`,
           next: card.action
         };
@@ -462,6 +617,7 @@ export function buildFollowUp(
       const [s1, s2, s3] = HOW_STEPS_BY_SUIT[sig.suit];
       return {
         kind,
+        bridge: `${bridgeBack} · 你想要具体怎么做。按这张牌的能量域拆 3 步。`,
         reading: `按 ${sig.suit === 'wands' ? '权杖' : sig.suit === 'cups' ? '圣杯' : sig.suit === 'swords' ? '宝剑' : '钱币'} 能量拆 3 步：\n${s1}\n${s2}\n${s3}`,
         next: `从第 1 步开始 · 今天就把它做掉`
       };
@@ -473,6 +629,7 @@ export function buildFollowUp(
       const stageHint = sig.stage ? `当前是「${sig.stage}」` : '';
       return {
         kind,
+        bridge: `${bridgeBack} · 你想知道这事为什么是这样。`,
         reading: `${why}。${stageHint} ${card.advice}`.trim(),
         next: card.action
       };
@@ -481,6 +638,7 @@ export function buildFollowUp(
       const meaning = isReversed ? card.reversed : card.upright;
       return {
         kind,
+        bridge: `${bridgeBack} · 你想把这张牌"翻译"成日常话。`,
         reading: `${cardName} = "${card.core}" 落到日常说就是：${meaning} 关键词：${card.keywords.join(' · ')}`,
         next: card.action
       };
@@ -488,6 +646,7 @@ export function buildFollowUp(
     default: {
       return {
         kind,
+        bridge: `${bridgeBack} · 你这一问没落进 6 类常见模式 · 回到牌本身的核心来答。`,
         reading: `回到这张牌的核心：${card.core} 你问的"${followUp.slice(0, 24)}${followUp.length > 24 ? '...' : ''}"在这张牌看来 = ${card.keywords[0]}的题`,
         next: card.action
       };

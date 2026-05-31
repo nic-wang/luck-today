@@ -3,11 +3,16 @@ import { useState } from 'react';
 import { TAROT_RWS_78, type TarotCardData } from '../../data/tarot-rws-78';
 import type { QimenChart } from '../../engine/adapters/taobi';
 import {
+  avoidImpactPcts,
   avoidNarrative,
+  concreteFor,
   nowNarrative,
+  SCORE_TIERS,
+  supportImpactPcts,
   supportNarrative,
+  themeImpactPcts,
   themeNarrative,
-  type NarrativeRow
+  tierContext
 } from '../../engine/narrativize';
 import { buildFollowUp, buildQuestionFusion, type FollowUpAnswer } from '../../engine/tarot-fusion';
 import type { DailyLuckResult, MemberProfile } from '../../types';
@@ -39,24 +44,135 @@ export function TodayPage({ daily, focusId, members }: Props) {
 }
 
 function SoloHero({ item, member }: { item: DailyLuckResult; member: MemberProfile }) {
+  return <ScoreHero item={item} member={member} />;
+}
+
+const LUCK_TO_HEIGHT: Record<string, number> = {
+  大吉: 0.95,
+  吉: 0.78,
+  中: 0.55,
+  凶: 0.32,
+  大凶: 0.18
+};
+
+function ScoreHero({ item, member }: { item: DailyLuckResult; member: MemberProfile }) {
+  const ctx = tierContext(item.score);
+  const score = item.score;
+  const accent = member.color;
+  const stops = makeAccentStops(accent);
+
+  // 12 时辰柱状图数据
+  const hours = item.hours ?? [];
+  const currentZhi = item.currentWindow.zhi;
+  const nextZhi = item.nextGoodWindow.zhi;
+
   return (
-    <section className="hero-compact">
-      <div className="hero-row hero-solo">
-        <div
-          className="hero-person is-active"
-          style={{ '--accent': member.color } as CSSProperties}
-        >
-          <img src={`${import.meta.env.BASE_URL}${member.photo}`} alt="" />
-          <div>
-            <p className="name">{member.name}</p>
-            <p className="meta">{member.wuxing} · 用神{member.yong}</p>
-          </div>
-          <strong>{item.score}</strong>
-          <em>{item.label}</em>
+    <section className="score-hero" style={{ '--accent': accent, '--c1': stops[0], '--c2': stops[1], '--c3': stops[2] } as CSSProperties}>
+      {/* 顶部 eyebrow · 头像 / 副标 / tier chip */}
+      <div className="hero-eyebrow-row">
+        <div className="hero-mini-avatar" style={member.photo ? undefined : { background: member.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {member.photo
+            ? <img src={`${import.meta.env.BASE_URL}${member.photo}`} alt="" />
+            : <span style={{ fontSize: 22 }}>{(member as { _emoji?: string })._emoji ?? '👤'}</span>
+          }
+        </div>
+        <div className="hero-eyebrow-text">
+          <span className="hero-eyebrow-label">{member.name} · TODAY SCORE</span>
+          <span className="hero-eyebrow-sub">{item.lunar} · {item.ganzhi}</span>
+        </div>
+        <span className="hero-tier-pill">{ctx.tier.label}</span>
+      </div>
+
+      {/* 大数字 + 单位 · 渐变字 */}
+      <div className="hero-num-row">
+        <strong className="hero-num">{score}</strong>
+        <span className="hero-num-unit">/ 100</span>
+        {ctx.toNext !== null && (
+          <span className="hero-num-next">距「{nextTierLabel(ctx.tier.min)}」{ctx.toNext} 分</span>
+        )}
+      </div>
+
+      {/* 12 时辰能量柱状图 · 横向坐标 · 当前/下一吉时高亮 */}
+      <div className="hero-bars-section">
+        <div className="hero-bars-head">
+          <span className="hero-bars-eyebrow">HOUR ENERGY · 今日 12 时辰能量分布</span>
+          <span className="hero-bars-legend">
+            <i className="lg-dot lg-current" /> 现在
+            <i className="lg-dot lg-next" /> 下一吉时
+          </span>
+        </div>
+
+        <div className="hero-bars" role="img" aria-label="12 时辰能量分布柱状图">
+          {hours.length > 0 ? hours.map((w, i) => {
+            const h = LUCK_TO_HEIGHT[w.luck] ?? 0.5;
+            const isCurrent = w.zhi === currentZhi;
+            const isNextGood = w.zhi === nextZhi && !isCurrent;
+            return (
+              <div
+                key={i}
+                className={`hour-col${isCurrent ? ' is-current' : ''}${isNextGood ? ' is-next' : ''}`}
+                title={`${w.zhi}时 · ${w.range} · ${w.gate} · ${w.luck}`}
+              >
+                <span className="hour-bar-shape" style={{ height: `${h * 100}%` }}>
+                  {isCurrent && <i className="bar-tick" />}
+                </span>
+                <span className="hour-zhi">{w.zhi}</span>
+              </div>
+            );
+          }) : null}
+        </div>
+
+        <p className="hero-bars-foot">
+          柱高 = 该时辰对你的能量强度（大吉&gt;吉&gt;中&gt;凶&gt;大凶）· 点击对照「深读」可看完整 12 时辰盘
+        </p>
+      </div>
+
+      {/* NOW / NEXT 重点信息 · 给出明确的"做什么" */}
+      <div className="hero-foot">
+        <div className="hero-foot-now">
+          <span className="hf-label">NOW · 当前能做</span>
+          <span className="hf-value">{currentZhi}时 · {item.currentWindow.gate}</span>
+          <span className="hf-advice">{item.currentWindow.advice}</span>
+        </div>
+        <div className="hero-foot-next">
+          <span className="hf-label">NEXT · 下一吉时</span>
+          <span className="hf-value">{nextZhi}时 · {item.nextGoodWindow.gate}</span>
+          <span className="hf-advice">{item.nextGoodWindow.range} · {item.nextGoodWindow.advice}</span>
         </div>
       </div>
     </section>
   );
+}
+
+// 单色系渐变 stops · 基于 accent 衍生（深 / 中 / 浅）
+function makeAccentStops(accent: string): [string, string, string] {
+  return [
+    accent,
+    mixHex(accent, '#ffffff', 0.35),
+    mixHex(accent, '#ffffff', 0.62)
+  ];
+}
+
+function mixHex(a: string, b: string, ratio: number): string {
+  const pa = parseHex(a);
+  const pb = parseHex(b);
+  const r = Math.round(pa[0] * (1 - ratio) + pb[0] * ratio);
+  const g = Math.round(pa[1] * (1 - ratio) + pb[1] * ratio);
+  const bl = Math.round(pa[2] * (1 - ratio) + pb[2] * ratio);
+  return `#${[r, g, bl].map(v => v.toString(16).padStart(2, '0')).join('')}`;
+}
+
+function parseHex(h: string): [number, number, number] {
+  const s = h.replace('#', '');
+  const v = s.length === 3
+    ? s.split('').map(c => parseInt(c + c, 16))
+    : [parseInt(s.slice(0, 2), 16), parseInt(s.slice(2, 4), 16), parseInt(s.slice(4, 6), 16)];
+  return [v[0], v[1], v[2]];
+}
+
+function nextTierLabel(currentMin: number): string {
+  const idx = SCORE_TIERS.findIndex(t => t.min === currentMin);
+  return idx > 0 ? SCORE_TIERS[idx - 1].label : '';
 }
 
 function SoloStack({ item, member }: { item: DailyLuckResult; member: MemberProfile }) {
@@ -64,19 +180,19 @@ function SoloStack({ item, member }: { item: DailyLuckResult; member: MemberProf
     <div className="day-stack">
 
       {/* 段 1 · 现在 */}
-      <SectionHeader title="现在" caption="当前时辰能做 / 不能做" />
+      <SectionHeader title="现在" caption="当前时辰能做 / 不能做" tone="now" />
       <NowCard item={item} />
 
       {/* 段 2 · 今日 */}
-      <SectionHeader title="今日" caption="主题 · 外援 · 避雷" />
+      <SectionHeader title="今日" caption="今日主题 · 贵人 · 闪避" tone="today" />
       <TodayBlocks item={item} member={member} />
 
       {/* 段 3 · 仪式 */}
-      <SectionHeader title="心相" caption="心态参考 · 不算分" />
+      <SectionHeader title="塔罗" caption="心态参考 · 不算分" tone="ritual" />
       <RitualCard item={item} member={member} />
 
       {/* 段 4 · 深读（折叠） */}
-      <SectionHeader title="深读" caption="想看推算过程？" />
+      <SectionHeader title="深读" caption="想看推算过程？" tone="deep" />
       <details className="deep-read">
         <summary>
           <span>展开奇门盘 + 时辰盘</span>
@@ -88,9 +204,9 @@ function SoloStack({ item, member }: { item: DailyLuckResult; member: MemberProf
   );
 }
 
-function SectionHeader({ title, caption }: { title: string; caption: string }) {
+function SectionHeader({ title, caption, tone }: { title: string; caption: string; tone?: 'now' | 'today' | 'ritual' | 'deep' }) {
   return (
-    <header className="section-head">
+    <header className="section-head" data-tone={tone ?? 'now'}>
       <h3>{title}</h3>
       <p>{caption}</p>
     </header>
@@ -117,78 +233,209 @@ function NowCard({ item }: { item: DailyLuckResult }) {
 
 function TodayBlocks({ item, member }: { item: DailyLuckResult; member: MemberProfile }) {
   const theme = themeNarrative(item);
-  const support = supportNarrative(item);
+  const support = supportNarrative(item, member);
   const avoid = avoidNarrative(item, member);
+
+  const goodFor = item.theme.goodFor.slice(0, 3);
+  const watchOut = item.theme.watchOut.slice(0, 3);
+  const goodNotes = concreteFor(member.id, goodFor);
+  const avoidNotes = concreteFor(member.id, watchOut);
+
+  const goodPcts = themeImpactPcts(item, true, goodFor.length);
+  const avoidPcts = themeImpactPcts(item, false, watchOut.length);
+  const supportPcts = supportImpactPcts(item);
+  const avoidRowPcts = avoidImpactPcts(item, avoid.rows.length);
+
   return (
     <div className="today-blocks">
       <article className="narrative-block theme-block">
         <header>
           <h4>今日主题</h4>
+          <span className="theme-badge">{theme.tagline}</span>
         </header>
-        <p className="conclusion"><strong>{theme.conclusion}</strong></p>
-        <p className="tagline">{theme.tagline}</p>
-        <div className="polarity-grid">
-          <div className="polarity-col polarity-do">
-            <span className="polarity-label">必做</span>
-            <ul>
-              {item.theme.goodFor.slice(0, 3).map(t => <li key={t}>{t}</li>)}
-            </ul>
+        <p className="conclusion"><strong>{themePlain(theme.conclusion, item.theme.shiShen)}</strong></p>
+
+        <div className="impact-mosaic">
+          <div className="mosaic-section mosaic-do">
+            <div className="mosaic-section-head">
+              <span className="ms-label">必做 · 今日推进力分布</span>
+              <span className="ms-sum">100<i>%</i></span>
+            </div>
+            <div className="mosaic-grid">
+              {goodFor.map((t, i) => (
+                <ImpactCard
+                  key={t}
+                  rank={i}
+                  impact={goodPcts[i]}
+                  polarity="do"
+                  label={t}
+                  note={goodNotes[i]}
+                />
+              ))}
+            </div>
+            <p className="mosaic-foot">3 件事按重要度切分推进力 · 数字越大 = 今天权重越高</p>
           </div>
-          <div className="polarity-col polarity-dont">
-            <span className="polarity-label">不做</span>
-            <ul>
-              {item.theme.watchOut.slice(0, 3).map(t => <li key={t}>{t}</li>)}
-            </ul>
+
+          <div className="mosaic-section mosaic-dont">
+            <div className="mosaic-section-head">
+              <span className="ms-label">不做 · 今日扣分风险分布</span>
+              <span className="ms-sum">100<i>%</i></span>
+            </div>
+            <div className="mosaic-grid">
+              {watchOut.map((t, i) => (
+                <ImpactCard
+                  key={t}
+                  rank={i}
+                  impact={avoidPcts[i]}
+                  polarity="dont"
+                  label={t}
+                  note={avoidNotes[i]}
+                />
+              ))}
+            </div>
+            <p className="mosaic-foot">3 个雷按风险度切分扣分概率 · 数字越大 = 越优先避开</p>
           </div>
         </div>
       </article>
-      <NarrativeBlock
-        title="今日外援"
-        polarity="do"
-        conclusion={support.conclusion}
-        rows={support.rows}
-      />
-      <NarrativeBlock
-        title="今日要避"
-        polarity="dont"
-        conclusion={avoid.conclusion}
-        rows={avoid.rows}
-      />
+
+      {/* 今日贵人 · 横条 progress 模板 · 100% 分拆 */}
+      <article className="narrative-block polarity-do">
+        <header>
+          <h4>今日贵人</h4>
+          <span className="block-sum-100">100<i>%</i></span>
+        </header>
+        <p className="conclusion"><strong>{support.conclusion}</strong></p>
+        <p className="block-eyebrow">HELPER PROGRESS · 今天能借的贵人之力</p>
+        <div className="progress-list">
+          {support.rows.map((row, i) => (
+            <ProgressRow
+              key={i}
+              icon={row.icon}
+              label={row.label}
+              detail={row.detail}
+              note={row.note}
+              impact={supportPcts[i]}
+              polarity="do"
+            />
+          ))}
+        </div>
+      </article>
+
+      {/* 今日闪避 · 横条 progress 模板 · 100% 分拆 */}
+      <article className="narrative-block polarity-dont">
+        <header>
+          <h4>今日闪避</h4>
+          <span className="block-sum-100">100<i>%</i></span>
+        </header>
+        <p className="conclusion"><strong>{avoid.conclusion}</strong></p>
+        <p className="block-eyebrow">DODGE PROGRESS · 今天要闪避的雷区</p>
+        <div className="progress-list">
+          {avoid.rows.map((row, i) => (
+            <ProgressRow
+              key={i}
+              icon={row.icon}
+              label={row.label}
+              detail={row.detail}
+              note={row.note}
+              impact={avoidRowPcts[i] ?? 33}
+              polarity="dont"
+            />
+          ))}
+        </div>
+      </article>
     </div>
   );
 }
 
-function NarrativeBlock({
-  title,
-  conclusion,
-  tagline,
-  rows,
+function ProgressRow({
+  icon,
+  label,
+  detail,
+  note,
+  impact,
   polarity
 }: {
-  title: string;
-  conclusion: string;
-  tagline?: string;
-  rows: NarrativeRow[];
-  polarity?: 'do' | 'dont';
+  icon: string;
+  label: string;
+  detail?: string;
+  note?: string;
+  impact: number;
+  polarity: 'do' | 'dont';
 }) {
+  const sign = polarity === 'do' ? '+' : '-';
+  const dotPos = Math.min(96, Math.max(4, impact));
   return (
-    <article className={`narrative-block${polarity ? ` polarity-${polarity}` : ''}`}>
-      <header>
-        <h4>{title}</h4>
+    <article className={`progress-row progress-${polarity}`}>
+      <header className="pr-head">
+        <span className="pr-icon" aria-hidden="true">{icon}</span>
+        <p className="pr-label">{label}</p>
       </header>
-      <p className="conclusion"><strong>{conclusion}</strong></p>
-      {tagline && <p className="tagline">{tagline}</p>}
-      <ul className="support-rows">
-        {rows.map((row, i) => (
-          <li key={i}>
-            <span className="row-icon" aria-hidden="true">{row.icon}</span>
-            <div>
-              <b>{row.label}</b>
-              {row.detail && <em>{row.detail}</em>}
-            </div>
-          </li>
-        ))}
-      </ul>
+      <div className="pr-meter">
+        <span className="pr-num">
+          <i className="pr-sign">{sign}</i>
+          <strong>{impact}</strong>
+          <i className="pr-unit">%</i>
+        </span>
+        <div className="pr-bar-wrap">
+          <div className="pr-bar">
+            <span className="pr-bar-fill" style={{ width: `${impact}%` }} />
+            <span className="pr-bar-dot" style={{ left: `${dotPos}%` }} />
+          </div>
+          <span className="pr-bar-end" aria-hidden="true" />
+        </div>
+      </div>
+      {detail && <p className="pr-detail">{detail}</p>}
+      {note && <p className="pr-note">{note}</p>}
+    </article>
+  );
+}
+
+// 把"比肩主题"等术语翻成白话 · 不出现"食神/比肩"等术语
+function themePlain(_tone: string, shiShen: string): string {
+  const plain: Record<string, string> = {
+    比肩: '今天靠协作出活 · 找同频伙伴一起推进 · 不一个人扛',
+    劫财: '今天能量足 · 适合行动但要克制冲动 · 别临时加码承诺',
+    食神: '今天适合做让自己开心的事 · 把想法真做出来',
+    伤官: '今天表达欲强 · 适合展示但要看场合',
+    偏财: '今天财气在流动 · 适合谈合作 / 拓人脉',
+    正财: '今天踏实做事的一天 · 把活做实 · 不冒进',
+    七杀: '今天压力大 · 适合啃硬骨头 · 注意身体',
+    正官: '今天走规矩 · 适合正式场合 / 流程',
+    偏印: '今天适合一个人钻研 · 选偏冷门视角',
+    正印: '今天适合学习吸收 · 接受指导'
+  };
+  return plain[shiShen] ?? _tone;
+}
+
+function ImpactCard({
+  rank,
+  impact,
+  polarity,
+  label,
+  note,
+  detail
+}: {
+  rank: number;
+  impact: number;
+  polarity: 'do' | 'dont';
+  label: string;
+  note?: string;
+  detail?: string;
+}) {
+  const sign = polarity === 'do' ? '+' : '-';
+  return (
+    <article className={`impact-card impact-${polarity} impact-rank-${rank}`}>
+      <div className="impact-num">
+        <span className="impact-sign">{sign}</span>
+        <span className="impact-val">{impact}</span>
+        <i className="impact-unit">%</i>
+      </div>
+      <div className="impact-bar" aria-hidden="true">
+        <span className="impact-bar-fill" style={{ width: `${Math.min(100, impact)}%` }} />
+      </div>
+      <p className="impact-label">{label}</p>
+      {detail && <p className="impact-detail">{detail}</p>}
+      {note && <p className="impact-note">{note}</p>}
     </article>
   );
 }
@@ -250,8 +497,8 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
   return (
     <article className="ritual-card">
       <header>
-        <h4>今日心相</h4>
-        <span className="tier-chip" data-tier="ritual">心相 · 不算分</span>
+        <h4>今日塔罗</h4>
+        <span className="tier-chip" data-tier="ritual">塔罗 · 不算分</span>
       </header>
 
       {/* 顶部：左 figure + 右 摘要/融合（保持等高 · 不留白） */}
@@ -272,17 +519,40 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
         </figure>
 
         {fusion ? (
-          <section className="ritual-side ritual-fusion">
-            <div className="side-head">
-              <span className="ritual-section-label">针对你的问题</span>
-              <p className="fusion-q">「{fusion.question}」</p>
-            </div>
-            <div className="side-mid">
-              <p className="fusion-angle">{fusion.angle}</p>
+          <section className={`ritual-side ritual-fusion fusion-tone-${fusion.tone}`}>
+            {/* 标准 header · 对齐 narrative-block：h4 + tier-chip */}
+            <header className="fusion-head">
+              <h4>针对你的问题</h4>
+              <span className="tier-chip" data-tier="ritual">{fusion.angle}</span>
+            </header>
+
+            {/* 用户问句 · 引文 · 弱化 */}
+            <p className="fusion-q">「{fusion.question}」</p>
+
+            {/* 主结论 · 用 .conclusion 标准类（15px / strong 渐变 · tone 决定渐变色）*/}
+            <p className="conclusion"><strong>{fusion.verdict}</strong></p>
+
+            {/* 副注 · block-eyebrow 标签 + reasoning body · 对齐主站三段式 */}
+            <p className="block-eyebrow">牌面解读</p>
+            <p className="fusion-reasoning">{fusion.reasoning}</p>
+
+            {/* action 用 support-rows 标准结构 */}
+            <ul className="support-rows fusion-action-rows">
+              <li>
+                <span className="row-icon">▎</span>
+                <div>
+                  <b>{fusion.actionLabel}</b>
+                  <em>{fusion.action}</em>
+                </div>
+              </li>
+            </ul>
+
+            <details className="fusion-deep">
+              <summary>展开进阶解读 · 牌的能量框架</summary>
               <p className="fusion-restatement">{fusion.restatement}</p>
               <p className="fusion-insight"><b>{tarot.name}{tarot.reversed ? ' 逆位' : ' 正位'}：</b>{fusion.insight}</p>
-              <p className="fusion-landing"><b>落到你的问题：</b>{fusion.landing}</p>
-            </div>
+              <p className="fusion-landing"><b>落到能量层：</b>{fusion.landing}</p>
+            </details>
           </section>
         ) : (
           <section className="ritual-side ritual-default">
@@ -297,7 +567,7 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
               </div>
               <p className="default-action"><b>动作：</b>{tarot.action}</p>
             </div>
-            <p className="side-foot">心相 = 心态参考 · 不进入今日得分</p>
+            <p className="side-foot">塔罗 = 心态参考 · 不进入今日得分</p>
           </section>
         )}
       </div>
@@ -315,6 +585,7 @@ function RitualCard({ item, member }: { item: DailyLuckResult; member: MemberPro
               {followUpHistory.map((h, i) => (
                 <article key={i} className={`followup-bubble fu-${h.answer.kind}`}>
                   <p className="fu-q">「{h.q}」</p>
+                  {h.answer.bridge && <p className="fu-bridge muted small">{h.answer.bridge}</p>}
                   <p className="fu-reading">{h.answer.reading}</p>
                   <p className="fu-next"><b>具体一步：</b>{h.answer.next}</p>
                   {h.answer.caveat && <p className="fu-caveat muted small">{h.answer.caveat}</p>}

@@ -16,50 +16,57 @@ interface RelationWithToday {
 }
 
 export function FamilyBoard({ members, relations, date }: Props) {
-  // 算所有关系的今日分数（一次算 · 后续按需排序 / 查询）
+  // 一次算好所有关系的今日 score
   const enriched = useMemo<RelationWithToday[]>(
     () => relations.map(r => ({ relation: r, today: computeRelationToday(r, date) })),
     [relations, date]
   );
 
-  // Hero 主关系：牛 × 嘻
+  // 按 today.score 排序：head=最强 / tail=最需补救
+  const sortedByScore = useMemo(
+    () => [...enriched].sort((a, b) => b.today.score - a.today.score),
+    [enriched]
+  );
+
   const heroRel = enriched.find(e => e.relation.id === 'niu_xixi');
+  const topStrong = sortedByScore[0];
+  const topWeak = sortedByScore[sortedByScore.length - 1];
 
-  // 自动选今日重点：牛 × 最低 + 嘻 × 最低（相对静态分数 + delta 的 today.score）
-  const niuFocus = useMemo(() => {
-    return [...enriched]
-      .filter(e => e.relation.pair.includes('niu') && !e.relation.pair.includes('xixi'))
-      .sort((a, b) => a.today.score - b.today.score)[0];
-  }, [enriched]);
-  const xixiFocus = useMemo(() => {
-    return [...enriched]
-      .filter(e => e.relation.pair.includes('xixi') && !e.relation.pair.includes('niu'))
-      .sort((a, b) => a.today.score - b.today.score)[0];
-  }, [enriched]);
+  const avgScore = useMemo(
+    () => enriched.reduce((s, e) => s + e.today.score, 0) / Math.max(1, enriched.length),
+    [enriched]
+  );
 
-  const featured = [heroRel, niuFocus, xixiFocus].filter(Boolean) as RelationWithToday[];
-
-  // 矩阵交互：选中的关系 id（折叠面板内）
+  // 矩阵交互
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selectedDetail = selectedId ? enriched.find(e => e.relation.id === selectedId) : null;
 
+  const today0 = enriched[0]?.today;
+  const ganzhi = today0?.dayGanzhi ?? '';
+  const wuxing = today0?.dayWuxing ?? '';
+
   return (
     <main className="page family-page">
+      <section className="family-overview-shell">
+        <header className="family-overview-head">
+          <p className="eyebrow">FAMILY · {ganzhi} · {wuxing}气</p>
+          <h2>家庭今日 · 共振</h2>
+          <p className="muted small">{members.length} 口人 · {enriched.length} 对关系 · 平均 {avgScore.toFixed(1)} / 5</p>
+        </header>
 
-      {/* 主位 · 今日双人关系 Hero */}
-      {heroRel && (
-        <FamilyHero entry={heroRel} members={members} />
-      )}
+        {heroRel && <FeatureCard entry={heroRel} members={members} />}
+      </section>
 
-      {/* 主位 · 今日重点关系 3 张 */}
-      <SectionHeader title="今日重点关系" caption="自动选 · 牛嘻 + 各自今日最受冲的关系" />
-      <div className="relation-grid">
-        {featured.map(entry => (
-          <RelationCard key={entry.relation.id} entry={entry} members={members} />
-        ))}
-      </div>
+      <section className="family-kpi-grid">
+        {topStrong && <KPICard kind="strong" entry={topStrong} members={members} />}
+        {topWeak && <KPICard kind="weak" entry={topWeak} members={members} />}
+      </section>
 
-      {/* 次位 · 全员关系矩阵 折叠 */}
+      <SectionHeader title="家庭成员" caption={`${members.length} 口 · 五行 + 当前能量`} tone="now" />
+      <ul className="family-list">
+        {members.map(m => <FamilyListRow key={m.id} member={m} sortedRelations={sortedByScore} />)}
+      </ul>
+
       <details className="family-matrix-fold">
         <summary>
           <span>全员关系矩阵 · 全景查询</span>
@@ -81,126 +88,157 @@ export function FamilyBoard({ members, relations, date }: Props) {
             ))}
           </div>
           {selectedDetail && (
-            <RelationCard entry={selectedDetail} members={members} compact />
+            <RelationCardMini entry={selectedDetail} members={members} />
           )}
         </div>
       </details>
-
-      {/* 最次 · 家庭成员档案 */}
-      <SectionHeader title="家庭成员" caption="名字 · 八字 · 用神 · 角色" />
-      <div className="member-archive">
-        {members.map(m => <MemberCard key={m.id} member={m} />)}
-      </div>
     </main>
   );
 }
 
-function SectionHeader({ title, caption }: { title: string; caption: string }) {
+function SectionHeader({ title, caption, tone }: { title: string; caption: string; tone?: 'now' | 'today' | 'ritual' | 'deep' }) {
   return (
-    <header className="section-head">
+    <header className="section-head" data-tone={tone ?? 'now'}>
       <h3>{title}</h3>
       <p>{caption}</p>
     </header>
   );
 }
 
-function FamilyHero({ entry, members }: { entry: RelationWithToday; members: MemberProfile[] }) {
+function FeatureCard({ entry, members }: { entry: RelationWithToday; members: MemberProfile[] }) {
   const { relation, today } = entry;
   const m1 = members.find(m => m.id === relation.pair[0])!;
   const m2 = members.find(m => m.id === relation.pair[1])!;
   const polarity = today.score >= 4 ? 'do' : today.score < 3 ? 'dont' : 'neutral';
+  const adviceParts = splitAdvice(today.advice);
   return (
-    <section className={`family-hero polarity-${polarity}`}>
-      <div className="hero-pair">
-        <PairAvatar member={m1} side="left" />
-        <div className="hero-link">
-          <span className="hero-keyword">{relation.keyword}</span>
-          <strong className="hero-score">{today.score.toFixed(1)}</strong>
-          <span className="hero-meta">{today.label} · {today.dayGanzhi} · {today.dayWuxing}气</span>
-        </div>
-        <PairAvatar member={m2} side="right" />
+    <article className={`family-feature-card polarity-${polarity}`}>
+      <div className="ff-eyebrow">
+        <span>FEATURED · {relation.keyword}</span>
+        <b>{today.label}</b>
       </div>
-      <p className="hero-essence">{relation.essence}</p>
-      <p className="hero-advice"><strong>{today.advice}</strong></p>
-      {relation.actions.length > 0 && (
-        <ul className="hero-actions">
-          {relation.actions.slice(0, 3).map(a => <li key={a}>{a}</li>)}
-        </ul>
-      )}
-    </section>
-  );
-}
-
-function PairAvatar({ member, side }: { member: MemberProfile; side: 'left' | 'right' }) {
-  return (
-    <div
-      className={`pair-avatar pair-${side}`}
-      style={{ '--accent': member.color } as CSSProperties}
-    >
-      <img src={`${import.meta.env.BASE_URL}${member.photo}`} alt="" />
-      <span>{member.name}</span>
-    </div>
-  );
-}
-
-function RelationCard({
-  entry,
-  members,
-  compact
-}: {
-  entry: RelationWithToday;
-  members: MemberProfile[];
-  compact?: boolean;
-}) {
-  const { relation, today } = entry;
-  const m1 = members.find(m => m.id === relation.pair[0])!;
-  const m2 = members.find(m => m.id === relation.pair[1])!;
-  const polarity = today.score >= 4 ? 'do' : today.score < 3 ? 'dont' : 'neutral';
-  return (
-    <article className={`relation-card polarity-${polarity}${compact ? ' is-compact' : ''}`}>
-      <header>
-        <div className="rc-pair">
-          <img src={`${import.meta.env.BASE_URL}${m1.photo}`} alt="" style={{ borderColor: m1.color }} />
-          <span className="rc-link">×</span>
-          <img src={`${import.meta.env.BASE_URL}${m2.photo}`} alt="" style={{ borderColor: m2.color }} />
+      <p className="ff-headline">
+        {adviceParts.lead && <strong>{adviceParts.lead}</strong>}
+        {adviceParts.lead ? '。' : ''}
+        {adviceParts.rest}
+      </p>
+      <div className="ff-pair-meta">
+        <div className="ff-pair-avatars">
+          <img src={`${import.meta.env.BASE_URL}${m1.photo}`} alt="" />
+          <span>×</span>
+          <img src={`${import.meta.env.BASE_URL}${m2.photo}`} alt="" />
         </div>
-        <div className="rc-head-meta">
-          <strong>{m1.name} × {m2.name}</strong>
-          <em>{relation.keyword}</em>
-        </div>
-        <div className="rc-score">
-          <strong>{today.score.toFixed(1)}</strong>
-          <span>{today.label}</span>
-        </div>
-      </header>
-      <p className="rc-conclusion">{today.advice}</p>
-      {today.realtimeReasons.length > 0 && (
-        <div className="rc-reasons">
-          {today.realtimeReasons.slice(0, 2).map(r => <span key={r}>{r}</span>)}
-        </div>
-      )}
-      {!compact && relation.actions.length > 0 && (
-        <ul className="rc-actions">
-          {relation.actions.slice(0, 2).map(a => <li key={a}>{a}</li>)}
-        </ul>
-      )}
+        <strong>{m1.name} × {m2.name}</strong>
+        <span className="ff-meta-chip">{today.dayGanzhi} · {today.dayWuxing}气</span>
+      </div>
     </article>
   );
 }
 
-function MemberCard({ member }: { member: MemberProfile }) {
+// 把 advice 拆成"主词 + 余下"，主词加渐变 strong
+function splitAdvice(text: string): { lead: string; rest: string } {
+  const m = text.match(/^([^，。·,.！？]+)([，。·,.！？].*)$/);
+  if (m) return { lead: m[1], rest: m[2] };
+  return { lead: '', rest: text };
+}
+
+function KPICard({ kind, entry, members }: { kind: 'strong' | 'weak'; entry: RelationWithToday; members: MemberProfile[] }) {
+  const { relation, today } = entry;
+  const m1 = members.find(m => m.id === relation.pair[0])!;
+  const m2 = members.find(m => m.id === relation.pair[1])!;
+  const tone = kind === 'strong' ? 'do' : 'dont';
+  const label = kind === 'strong' ? '今日最强' : '今日最需补救';
+  const icon = kind === 'strong' ? '⚡' : '⚠';
+  const scorePct = Math.round((today.score / 5) * 100);
   return (
-    <article
-      className="member-card"
-      style={{ '--accent': member.color, '--tint': member.colorBg } as CSSProperties}
-    >
-      <img src={`${import.meta.env.BASE_URL}${member.photo}`} alt="" />
-      <div className="mc-info">
-        <strong>{member.name}</strong>
-        <span className="mc-role">{member.role}</span>
-        <span className="mc-bazi">{member.bazi}</span>
-        <span className="mc-yong">{member.wuxing} · 用神{member.yong ?? '—'}</span>
+    <article className={`family-kpi-card tone-${tone}`}>
+      <div className="kpi-head">
+        <span className="kpi-label">{label}</span>
+        <span className="kpi-icon">{icon}</span>
       </div>
+      <div className="kpi-num">
+        <strong>{today.score.toFixed(1)}</strong>
+        <span>/ 5</span>
+      </div>
+      <div className="kpi-meta">
+        <div className="kpi-meta-cell">
+          <b>{m1.name} × {m2.name}</b>
+          <span>{relation.keyword}</span>
+        </div>
+        <div className="kpi-meta-cell">
+          <b>{today.label}</b>
+          <span>{today.dayWuxing}气 · {today.delta >= 0 ? '+' : ''}{today.delta.toFixed(1)}</span>
+        </div>
+      </div>
+      <div className={`energy-spectrum kpi-spectrum tone-${tone}`}>
+        <div className="es-bar">
+          <span className="es-fill" style={{ width: `${scorePct}%` }} />
+        </div>
+        <span className="es-num">{scorePct}%</span>
+      </div>
+    </article>
+  );
+}
+
+function FamilyListRow({ member, sortedRelations }: { member: MemberProfile; sortedRelations: RelationWithToday[] }) {
+  const myRelations = sortedRelations.filter(e => e.relation.pair.includes(member.id));
+  const avgScore = myRelations.length > 0
+    ? myRelations.reduce((s, e) => s + e.today.score, 0) / myRelations.length
+    : 3;
+  const scorePct = Math.round((avgScore / 5) * 100);
+  const tone = avgScore >= 4 ? 'do' : avgScore < 3 ? 'dont' : 'neutral';
+  const emoji = (member as { _emoji?: string })._emoji ?? defaultEmoji(member);
+
+  return (
+    <li className="family-list-row" style={{ '--accent': member.color } as CSSProperties}>
+      <div className="fl-avatar">
+        {member.photo
+          ? <img src={`${import.meta.env.BASE_URL}${member.photo}`} alt="" />
+          : <span>{emoji}</span>
+        }
+      </div>
+      <div className="fl-info">
+        <div className="fl-name">{member.name}</div>
+        <div className="fl-role">{member.role}</div>
+      </div>
+      <div className="fl-right">
+        <span className="fl-chip">{member.mainWuxing}</span>
+        <div className={`energy-spectrum fl-spectrum tone-${tone}`}>
+          <div className="es-bar">
+            <span className="es-fill" style={{ width: `${scorePct}%` }} />
+          </div>
+        </div>
+      </div>
+    </li>
+  );
+}
+
+function defaultEmoji(member: MemberProfile): string {
+  if (member.kind === 'pet') return '🐾';
+  return member.gender === '女' ? '👩' : '👨';
+}
+
+function RelationCardMini({ entry, members }: { entry: RelationWithToday; members: MemberProfile[] }) {
+  const { relation, today } = entry;
+  const m1 = members.find(m => m.id === relation.pair[0])!;
+  const m2 = members.find(m => m.id === relation.pair[1])!;
+  const tone = today.score >= 4 ? 'do' : today.score < 3 ? 'dont' : 'neutral';
+  return (
+    <article className={`relation-card-mini tone-${tone}`}>
+      <header className="rcm-head">
+        <strong>{m1.name} × {m2.name}</strong>
+        <em>{relation.keyword}</em>
+      </header>
+      <div className="rcm-score">
+        <b>{today.score.toFixed(1)}</b>
+        <span>/ 5 · {today.label}</span>
+      </div>
+      <p className="rcm-conclusion">{today.advice}</p>
+      {today.realtimeReasons.length > 0 && (
+        <div className="rcm-reasons">
+          {today.realtimeReasons.slice(0, 3).map(r => <span key={r}>{r}</span>)}
+        </div>
+      )}
     </article>
   );
 }

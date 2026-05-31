@@ -24,6 +24,7 @@ export interface MemberProfile {
   chips: string[];
   highlight: string;
   challenges?: Array<{ tag: string; text: string }>;
+  isGuest?: boolean;  // 访客模式标记 · UI 区分（true = 朋友自建档案 · false/undefined = 主理人 PIN 进入）
 }
 
 export interface RelationProfile {
@@ -82,6 +83,7 @@ export interface DailyLuckResult {
   }>;
   currentWindow: TimeWindow;
   nextGoodWindow: TimeWindow;
+  hours: TimeWindow[];
   recommendations: {
     colors: string[];
     foods: string[];

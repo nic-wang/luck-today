@@ -606,10 +606,10 @@
 
 <!-- Tab 顶栏 -->
 <nav class="tabbar" id="tabbar">
-  <button data-tab="today" class="active">📍 今日</button>
-  <button data-tab="family">🏠 家庭命格</button>
-  <button data-tab="relations">🔗 关系矩阵</button>
-  <button data-tab="dayun">🛤️ 大运</button>
+  <button data-tab="today" class="active">今日</button>
+  <button data-tab="family">家庭命格</button>
+  <button data-tab="relations">关系矩阵</button>
+  <button data-tab="dayun">大运</button>
 </nav>
 
 <main>
@@ -624,7 +624,7 @@
           <div class="hero-avatar"></div>
           <div class="hero-meta">
             <h2>牛牛 <span style="font-size:13px;font-weight:400;color:var(--ink-soft)">· 王宁</span></h2>
-            <div class="alias">乙木 · 用神水 · 🐍蛇</div>
+            <div class="alias">乙木 · 用神水 · 蛇</div>
             <div class="bazi">己巳 · 己巳 · 乙亥 · 癸未</div>
           </div>
         </div>
@@ -712,7 +712,7 @@
           <div class="hero-avatar"></div>
           <div class="hero-meta">
             <h2>嘻嘻 <span style="font-size:13px;font-weight:400;color:var(--ink-soft)">· 郭玉玺</span></h2>
-            <div class="alias">丙火 · 用神水 · 🐰兔</div>
+            <div class="alias">丙火 · 用神水 · 兔</div>
             <div class="bazi">己卯 · 己巳 · 丙戌 · 己亥</div>
           </div>
         </div>
@@ -836,7 +836,7 @@
   <!-- ━━━━━━━━━━ Tab: 大运 ━━━━━━━━━━ -->
   <div class="tab-pane" id="tab-dayun">
     <div class="full-row">
-      <h3>🛤️ 大运 · 未来 3 步（基于八字命局）</h3>
+      <h3>大运 · 未来 3 步（基于八字命局）</h3>
       <div id="dayunBox" style="display:grid;grid-template-columns:1fr 1fr;gap:24px"></div>
       <p style="margin-top:18px;font-size:12px;color:var(--ink-soft);line-height:1.7">
         ※ 大运是十年一变的人生周期 · 流年是当年小循环 · 这里只列未来 3 个高低节点。<br>
@@ -874,7 +874,7 @@ if ('serviceWorker' in navigator) {
             // controller 存在 = 有旧版 · 现在新版装好了 · 提示刷新
             const t = document.getElementById('toast');
             if (t) {
-              t.innerHTML = '✨ 新版已就绪 · <u style="cursor:pointer" onclick="location.reload()">点这里刷新</u>';
+              t.innerHTML = '新版已就绪 · <u style="cursor:pointer" onclick="location.reload()">点这里刷新</u>';
               t.classList.add('show');
               // 新版 toast 不自动消失 · 用户主动刷
             }

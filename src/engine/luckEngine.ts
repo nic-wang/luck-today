@@ -33,7 +33,7 @@ const DIZHI_WUXING: Record<string, Wuxing> = {
   子: '水', 丑: '土', 寅: '木', 卯: '木', 辰: '土', 巳: '火', 午: '火', 未: '土', 申: '金', 酉: '金', 戌: '土', 亥: '水'
 };
 const SHENGXIAO: Record<string, string> = {
-  子: '🐀鼠', 丑: '🐂牛', 寅: '🐯虎', 卯: '🐰兔', 辰: '🐉龙', 巳: '🐍蛇', 午: '🐎马', 未: '🐏羊', 申: '🐒猴', 酉: '🐔鸡', 戌: '🐕狗', 亥: '🐖猪'
+  子: '鼠', 丑: '牛', 寅: '虎', 卯: '兔', 辰: '龙', 巳: '蛇', 午: '马', 未: '羊', 申: '猴', 酉: '鸡', 戌: '狗', 亥: '猪'
 };
 const WX_SHENG: Record<Wuxing, Wuxing> = { 木: '火', 火: '土', 土: '金', 金: '水', 水: '木' };
 const WX_KE: Record<Wuxing, Wuxing> = { 木: '土', 土: '水', 水: '火', 火: '金', 金: '木' };
@@ -429,6 +429,7 @@ export function computeDailyLuck(member: MemberProfile, date = new Date()): Dail
     radar,
     currentWindow: current,
     nextGoodWindow: next,
+    hours: windows,
     recommendations: {
       colors: pack.colors,
       foods: pack.foods,

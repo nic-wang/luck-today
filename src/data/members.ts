@@ -15,11 +15,11 @@ export const members: MemberProfile[] = [
     birthHour: 14,
     gender: '男',
     bazi: '己巳·己巳·乙亥·癸未',
-    zodiac: '🐍 蛇',
+    zodiac: '蛇',
     wuxing: '乙木',
     yong: '水',
     mainWuxing: '木',
-    chips: ['乙木', '用神水', '🐍蛇', '驿马已激活'],
+    chips: ['乙木', '用神水', '蛇', '驿马已激活'],
     highlight: '乙木藤蔓 · 初夏巳月炎燥 · 火旺土重木弱金严重不足 · 用神水调候 · 当前乙丑积累期（2022-2031）· 2032 甲子大爆发',
     challenges: [
       { tag: '事业', text: '主动请教一个具体问题，并记录成下一步动作' },
@@ -42,11 +42,11 @@ export const members: MemberProfile[] = [
     birthHour: 22,
     gender: '女',
     bazi: '己卯·己巳·丙戌·己亥',
-    zodiac: '🐰 兔',
+    zodiac: '兔',
     wuxing: '丙火',
     yong: '水',
     mainWuxing: '火',
-    chips: ['丙火', '用神水', '🐰兔', '巳月帝旺'],
+    chips: ['丙火', '用神水', '兔', '巳月帝旺'],
     highlight: '丙火太阳 · 巳月帝旺身强 · 用神水调候制旺火 · 紫微财帛太阳+巨门 · 2027 文昌黄金年 · 2031 辛亥留学窗',
     challenges: [
       { tag: '形象', text: '搭一身自己满意的造型并自拍存档' },
@@ -66,10 +66,10 @@ export const members: MemberProfile[] = [
     photo: 'assets/photos/泡泡-像素图.png',
     birthDate: '2021-04-16',
     bazi: '辛丑·壬辰',
-    zodiac: '🐂 牛',
+    zodiac: '牛',
     wuxing: '辛金 + 壬水',
     mainWuxing: '水',
-    chips: ['辛金', '壬水', '🐂牛', '丙辛合水'],
+    chips: ['辛金', '壬水', '牛', '丙辛合水'],
     highlight: '辛金生壬水 · 名字带水气 · 与嘻嘻产生“丙辛合水” · 全家唯一合化关系'
   },
   {
@@ -83,10 +83,10 @@ export const members: MemberProfile[] = [
     photo: 'assets/photos/蛋蛋-像素图.jpg',
     birthDate: '2020-07-26',
     bazi: '庚子·癸未',
-    zodiac: '🐀 鼠',
+    zodiac: '鼠',
     wuxing: '庚金 + 子癸双水',
     mainWuxing: '水',
-    chips: ['庚金', '子+癸双水', '🐀鼠', '水库'],
+    chips: ['庚金', '子+癸双水', '鼠', '水库'],
     highlight: '全家最强水库 · 庚子双水（子+癸）+ 庚金生水 · 与牛牛“乙庚合金”加固结构'
   },
   {
@@ -100,10 +100,10 @@ export const members: MemberProfile[] = [
     photo: 'assets/photos/小五-像素图.png',
     birthDate: '2022-03-09',
     bazi: '壬寅·癸卯',
-    zodiac: '🐯 虎',
+    zodiac: '虎',
     wuxing: '壬癸双水 + 寅卯双木',
     mainWuxing: '水',
-    chips: ['壬癸双水', '寅卯木', '🐯虎', '挚友'],
+    chips: ['壬癸双水', '寅卯木', '虎', '挚友'],
     highlight: '水木顶配 · 与牛牛乙木同类共振 + 双水滋润 · 嘻嘻的灭火解药'
   },
   {
@@ -117,10 +117,10 @@ export const members: MemberProfile[] = [
     photo: 'assets/photos/糯米鸡-像素图.png',
     birthDate: '2026-03-05',
     bazi: '丙午·庚寅',
-    zodiac: '🐎 马',
+    zodiac: '马',
     wuxing: '丙午双火 + 庚金 + 寅木',
     mainWuxing: '火',
-    chips: ['丙午双火', '🐎马', '幼鸟期', '⚠️火警'],
+    chips: ['丙午双火', '马', '幼鸟期', '火警'],
     highlight: '全家最火 · 丙午年柱 + 寅木助火 · 名字“糯米鸡（水土金）”反向补救火气'
   }
 ];

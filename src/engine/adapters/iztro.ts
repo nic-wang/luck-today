@@ -51,7 +51,9 @@ export function computeZiweiChart(member: MemberProfile): ZiweiChart | null {
       heavenlyStem: p.heavenlyStem,
       earthlyBranch: p.earthlyBranch,
       isBodyPalace: !!p.isBodyPalace,
-      isSoulPalace: !!p.isOriginalPalace,
+      // FIX: iztro 的 isOriginalPalace 是「来因宫」标记 · 不是命宫
+      // 命宫 = palace.name === '命宫' · 这才是 12 宫第一宫
+      isSoulPalace: p.name === '命宫',
       majorStars: (p.majorStars ?? []).map(s => s.name),
       minorStars: [
         ...(p.minorStars ?? []).map(s => s.name),

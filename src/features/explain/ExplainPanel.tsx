@@ -4,7 +4,7 @@ import type { AlgorithmFactor, AlgorithmVersion, DailyLuckResult, LuckTier } fro
 const TIER_LABEL: Record<LuckTier, string> = {
   deterministic: '命定',
   interpretive: '推演',
-  ritual: '心相'
+  ritual: '塔罗'
 };
 
 const FOCUS_COLOR = '#5c8a6b';
