@@ -36,7 +36,7 @@ export const members: MemberProfile[] = [
     role: '人 · 主出镜',
     color: '#C9A26B',
     colorBg: '#F5EBD8',
-    photo: 'assets/photos/嘻嘻-像素图.jpg',
+    photo: 'assets/photos/嘻嘻-像素图.jpg?v=2',
     photoPos: 'center center',
     birthDate: '1999-06-03',
     birthHour: 22,
