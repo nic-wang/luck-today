@@ -1,6 +1,6 @@
 {
-  "name": "命理今日",
-  "short_name": "命理",
+  "name": "TOF",
+  "short_name": "TOF",
   "description": "双视角趋吉避凶 · 家庭仪表盘",
   "start_url": "/luck-today/",
   "scope": "/luck-today/",

@@ -1,6 +1,6 @@
 {
-  "name": "命理今日",
-  "short_name": "命理",
+  "name": "TOF",
+  "short_name": "TOF",
   "description": "私人日运 OS · 今日简报 · 家庭关系 · 解释型算法",
   "start_url": "/luck-today/",
   "scope": "/luck-today/",

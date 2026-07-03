@@ -2,11 +2,11 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.nicwang.lucktoday',
-  appName: '命理今日',
+  appName: 'TOF',
   webDir: 'dist',
   ios: {
     contentInset: 'automatic',
-    scheme: 'LuckToday',
+    scheme: 'TOF',
     minVersion: '15.0',
   },
 };

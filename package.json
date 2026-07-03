@@ -9,6 +9,8 @@
     "build:ios": "tsc --noEmit && CAPACITOR=1 vite build",
     "cap:sync": "npm run build:ios && npx cap sync ios",
     "cap:open": "npx cap open ios",
+    "ios:setup": "bash scripts/ios-testflight-setup.sh",
+    "ios:check-signing": "bash scripts/ios-check-signing.sh",
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run"
   },
